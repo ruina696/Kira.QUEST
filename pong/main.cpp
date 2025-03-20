@@ -5,6 +5,7 @@
 #include "windows.h"
 #include <vector>
 #include <string>
+#include <time.h>
 using namespace std;
 
 
@@ -92,36 +93,39 @@ void InitGame()
     i.Sprite.hBitmap = (HBITMAP)LoadImageA(NULL, "sword.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
     itemLib.push_back(i);
 
-    loc[0].items.push_back(itemLib[(int)itemID::axe]);
-    loc[0].items.push_back(itemLib[(int)itemID::sword]);
-    loc[0].items.push_back(itemLib[(int)itemID::hemlet]);
+    srand(time(NULL));
+    int temp = rand() % 3;
+
+    loc[temp].items.push_back(itemLib[(int)itemID::axe]);
+    loc[temp].items.push_back(itemLib[(int)itemID::sword]);
+    loc[temp].items.push_back(itemLib[(int)itemID::hemlet]);
 
 
 
-    loc[0].hBitmap = (HBITMAP)LoadImageA(NULL, "loc0.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    loc[0].left_portal = 2;
-    loc[0].right_portal = 1;
+loc[0].hBitmap = (HBITMAP)LoadImageA(NULL, "loc0.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+loc[0].left_portal = 2;
+loc[0].right_portal = 1;
 
-    loc[1].hBitmap = (HBITMAP)LoadImageA(NULL, "loc1.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    loc[1].left_portal = 0;
-    loc[1].right_portal = 2;
+loc[1].hBitmap = (HBITMAP)LoadImageA(NULL, "loc1.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+loc[1].left_portal = 0;
+loc[1].right_portal = 2;
 
-    loc[2].hBitmap = (HBITMAP)LoadImageA(NULL, "loc2.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    loc[2].left_portal = 1;
-    loc[2].right_portal = 0;
+loc[2].hBitmap = (HBITMAP)LoadImageA(NULL, "loc2.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+loc[2].left_portal = 1;
+loc[2].right_portal = 0;
 
-    player.current_location = 0;
-    player.hero_sprite.x = 0;
-    player.hero_sprite.y = window.height-50;
-    player.hero_sprite.width = 50;
-    player.hero_sprite.height = 50;
-    player.hero_sprite.hBitmap = (HBITMAP)LoadImageA(NULL, "racket.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+player.current_location = 0;
+player.hero_sprite.x = 100;
+player.hero_sprite.y = window.height - 50;
+player.hero_sprite.width = 50;
+player.hero_sprite.height = 50;
+player.hero_sprite.hBitmap = (HBITMAP)LoadImageA(NULL, "racket.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
-    
-    game.score = 0;
-    game.balls = 9;
 
-   
+game.score = 0;
+game.balls = 9;
+
+
 }
 
 void ProcessSound(const char* name)//проигрывание аудиофайла в формате .wav, файл должен лежать в той же папке где и программа
@@ -144,8 +148,13 @@ void ShowScore()
     TextOutA(window.context, 200, 10, (LPCSTR)txt, strlen(txt));
 
     _itoa_s(game.balls, txt, 10);
-    TextOutA(window.context, 10, 100, "Balls", 5);
-    TextOutA(window.context, 200, 100, (LPCSTR)txt, strlen(txt));
+    TextOutA(window.context, 10, 100, "ITEMS", 5);
+
+    
+    
+    //ShowBitmap((window.context, item.x, item.y, item.width, item.height, item.hBitmap))
+    
+    //TextOutA(window.context, 200, 100, (LPCSTR)txt, strlen(txt));
 }
 
 void ProcessInput()
@@ -195,8 +204,20 @@ void ShowRacketAndBall()
     for (int i = 0; i < loc[player.current_location].items.size(); i++) {
         auto item = loc[player.current_location].items[i].Sprite;
         ShowBitmap(window.context, item.x, item.y, item.width, item.height, item.hBitmap);
+
+        if (player.hero_sprite.x <= loc[player.current_location].items[i].Sprite.x){
+
+            auto iter = loc[player.current_location].items.cbegin();
+            loc[player.current_location].items.erase(iter + i);
+            player.items.emplace_back(itemLib[(int)itemID::axe]);
+        }
+
     }
 
+   /* for (int i = 0; i < loc[player.current_location].items.size(); i++) {*/
+       // auto temp1 = player.items[.Sprite;
+        ShowBitmap(window.context, 200, 100, player.items[0].Sprite.width, player.items[0].Sprite.height, player.items[0].Sprite.hBitmap);
+   // }
 
     ShowBitmap(window.context, player.hero_sprite.x, player.hero_sprite.y, player.hero_sprite.width, player.hero_sprite.height, player.hero_sprite.hBitmap );// ракетка игрока
    
