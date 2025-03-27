@@ -87,7 +87,7 @@ void InitGame()
     itemLib.push_back(i);
 
     i.name = "sword";
-    i.Sprite.x = 2150;
+    i.Sprite.x = 850;
     i.Sprite.y = window.height - 50;;
     i.Sprite.height = 50;
     i.Sprite.width = 50;
@@ -98,7 +98,7 @@ void InitGame()
     int temp = rand() % 3;
 
     loc[0].items.push_back(itemLib[(int)itemID::axe]);
-    loc[1].items.push_back(itemLib[(int)itemID::sword]);
+    loc[0].items.push_back(itemLib[(int)itemID::sword]);
     loc[2].items.push_back(itemLib[(int)itemID::hemlet]);
 
 
@@ -144,8 +144,8 @@ void ShowScore()
     auto hTmp = (HFONT)SelectObject(window.context, hFont);
 
     char txt[32];//буфер для текста
-    _itoa_s(game.score, txt, 10);//преобразование числовой переменной в текст. текст окажется в переменной txt
-    TextOutA(window.context, 10, 10, "Score", 5);
+    _itoa_s(player.life, txt, 10);//преобразование числовой переменной в текст. текст окажется в переменной txt
+    TextOutA(window.context, 10, 10, "Health", 6);
     TextOutA(window.context, 200, 10, (LPCSTR)txt, strlen(txt));
 
     _itoa_s(game.balls, txt, 10);
@@ -224,19 +224,19 @@ void ShowRacketAndBall()
     ShowBitmap(window.context, player.hero_sprite.x, player.hero_sprite.y, player.hero_sprite.width, player.hero_sprite.height, player.hero_sprite.hBitmap );// ракетка игрока
    
 }
-void Jump() {
-    int pl_jump = 0;
-    if (GetAsyncKeyState(VK_SPACE)) {
-        int pl_jump = player.hero_sprite.y -= 50;
-        
-    }
-    
-        int gravity = 15;
-        player.hero_sprite.y += gravity;
-
-        pl_jump = min(window.height, pl_jump);
-    
-}
+//void Jump() {
+//    int pl_jump = 0;
+//    if (GetAsyncKeyState(VK_SPACE)) {
+//        int pl_jump = player.hero_sprite.y -= 50;
+//        
+//    }
+//    
+//        int gravity = 15;
+//        player.hero_sprite.y += gravity;
+//
+//        pl_jump = min(window.height, pl_jump);
+//    
+//}
 
 void LimitRacket()
 {
@@ -289,7 +289,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         Sleep(16);//ждем 16 милисекунд (1/количество кадров в секунду)
 
         ProcessInput();//опрос клавиатуры
-        Jump();
+        //Jump();
         LimitRacket();//проверяем, чтобы ракетка не убежала за экран
     }
 
