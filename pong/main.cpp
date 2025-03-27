@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <time.h>
+#include <math.h>
 using namespace std;
 
 
@@ -33,7 +34,7 @@ struct player_ {
     sprite hero_sprite;
     int life = 10;
     int current_location = 0;
-    vector <item_> items;
+    vector <item_> player_items;
 };
 
 player_ player;
@@ -96,9 +97,9 @@ void InitGame()
     srand(time(NULL));
     int temp = rand() % 3;
 
-    loc[temp].items.push_back(itemLib[(int)itemID::axe]);
-    loc[temp].items.push_back(itemLib[(int)itemID::sword]);
-    loc[temp].items.push_back(itemLib[(int)itemID::hemlet]);
+    loc[0].items.push_back(itemLib[(int)itemID::axe]);
+    loc[1].items.push_back(itemLib[(int)itemID::sword]);
+    loc[2].items.push_back(itemLib[(int)itemID::hemlet]);
 
 
 
@@ -162,11 +163,11 @@ void ProcessInput()
     if (GetAsyncKeyState(VK_LEFT)) player.hero_sprite.x -= 30;
     if (GetAsyncKeyState(VK_RIGHT)) player.hero_sprite.x += 30;
 
-    if (!game.action && GetAsyncKeyState(VK_SPACE))
+    /*if (!game.action && GetAsyncKeyState(VK_SPACE))
     {
         game.action = true;
         ProcessSound("bounce.wav");
-    }
+    }*/
 }
 
 void ShowBitmap(HDC hDC, int x, int y, int x1, int y1, HBITMAP hBitmapBall, bool alpha = false)
@@ -201,26 +202,40 @@ void ShowRacketAndBall()
 {
     ShowBitmap(window.context, 0, 0, window.width, window.height, loc[player.current_location].hBitmap);//задний фон
 
-    for (int i = 0; i < loc[player.current_location].items.size(); i++) {
+    for (int i = loc[player.current_location].items.size() - 1; i >= 0; i--) {
         auto item = loc[player.current_location].items[i].Sprite;
         ShowBitmap(window.context, item.x, item.y, item.width, item.height, item.hBitmap);
 
-        if (player.hero_sprite.x <= loc[player.current_location].items[i].Sprite.x){
+        if (player.hero_sprite.x + player.hero_sprite.width >= item.x &&
+            player.hero_sprite.x <= item.x + item.width) {
 
-            auto iter = loc[player.current_location].items.cbegin();
-            loc[player.current_location].items.erase(iter + i);
-            player.items.emplace_back(itemLib[(int)itemID::axe]);
+            player.player_items.push_back(loc[player.current_location].items[i]);
+            loc[player.current_location].items.erase(loc[player.current_location].items.begin() + i);
         }
 
     }
 
-   /* for (int i = 0; i < loc[player.current_location].items.size(); i++) {*/
-       // auto temp1 = player.items[.Sprite;
-        ShowBitmap(window.context, 200, 100, player.items[0].Sprite.width, player.items[0].Sprite.height, player.items[0].Sprite.hBitmap);
-   // }
+    if (!player.player_items.empty()) {
+       for (int i = 0; i < player.player_items.size(); i++) {
+           ShowBitmap(window.context, 200 + i * 50, 100, player.player_items[i].Sprite.width, player.player_items[i].Sprite.height, player.player_items[i].Sprite.hBitmap);
+        }
+    }
 
     ShowBitmap(window.context, player.hero_sprite.x, player.hero_sprite.y, player.hero_sprite.width, player.hero_sprite.height, player.hero_sprite.hBitmap );// ракетка игрока
    
+}
+void Jump() {
+    int pl_jump = 0;
+    if (GetAsyncKeyState(VK_SPACE)) {
+        int pl_jump = player.hero_sprite.y -= 50;
+        
+    }
+    
+        int gravity = 15;
+        player.hero_sprite.y += gravity;
+
+        pl_jump = min(window.height, pl_jump);
+    
 }
 
 void LimitRacket()
@@ -274,6 +289,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         Sleep(16);//ждем 16 милисекунд (1/количество кадров в секунду)
 
         ProcessInput();//опрос клавиатуры
+        Jump();
         LimitRacket();//проверяем, чтобы ракетка не убежала за экран
     }
 
