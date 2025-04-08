@@ -39,10 +39,17 @@ struct player_ {
 
 player_ player;
 
+struct platform_ {
+    sprite plat_sprite;
+};
+
+
+
 struct location_ {
     HBITMAP hBitmap;
     int left_portal;
     int right_portal;
+    platform_ platform;
     vector <item_> items;
 };
 
@@ -101,6 +108,11 @@ void InitGame()
     loc[0].items.push_back(itemLib[(int)itemID::sword]);
     loc[2].items.push_back(itemLib[(int)itemID::hemlet]);
 
+    loc[0].platform.plat_sprite.x = 1200;
+    loc[0].platform.plat_sprite.y = window.height - 250;
+    loc[0].platform.plat_sprite.height = 50;
+    loc[0].platform.plat_sprite.width = 500;
+    loc[0].platform.plat_sprite.hBitmap = (HBITMAP)LoadImageA(NULL, "racket.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
 
 loc[0].hBitmap = (HBITMAP)LoadImageA(NULL, "loc0.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -160,8 +172,8 @@ void ShowScore()
 
 void ProcessInput()
 {
-    if (GetAsyncKeyState(VK_LEFT)) player.hero_sprite.x -= 30;
-    if (GetAsyncKeyState(VK_RIGHT)) player.hero_sprite.x += 30;
+    if (GetAsyncKeyState(VK_LEFT)) player.hero_sprite.x -= 15;
+    if (GetAsyncKeyState(VK_RIGHT)) player.hero_sprite.x += 15;
 
     /*if (!game.action && GetAsyncKeyState(VK_SPACE))
     {
@@ -197,7 +209,7 @@ void ShowBitmap(HDC hDC, int x, int y, int x1, int y1, HBITMAP hBitmapBall, bool
 
     DeleteDC(hMemDC); // Удаляем контекст памяти
 }
-
+int gravity = 15;
 void ShowRacketAndBall()
 {
     ShowBitmap(window.context, 0, 0, window.width, window.height, loc[player.current_location].hBitmap);//задний фон
@@ -206,8 +218,8 @@ void ShowRacketAndBall()
         auto item = loc[player.current_location].items[i].Sprite;
         ShowBitmap(window.context, item.x, item.y, item.width, item.height, item.hBitmap);
 
-        if (player.hero_sprite.x + player.hero_sprite.width >= item.x &&
-            player.hero_sprite.x <= item.x + item.width) {
+        if (player.hero_sprite.x + player.hero_sprite.width >= item.x  && player.hero_sprite.x <= item.x + item.width &&
+            player.hero_sprite.y + player.hero_sprite.height >= item.y) {
 
             player.player_items.push_back(loc[player.current_location].items[i]);
             loc[player.current_location].items.erase(loc[player.current_location].items.begin() + i);
@@ -222,21 +234,56 @@ void ShowRacketAndBall()
     }
 
     ShowBitmap(window.context, player.hero_sprite.x, player.hero_sprite.y, player.hero_sprite.width, player.hero_sprite.height, player.hero_sprite.hBitmap );// ракетка игрока
-   
+    ShowBitmap(window.context, loc[0].platform.plat_sprite.x, loc[0].platform.plat_sprite.y, loc[0].platform.plat_sprite.width, loc[0].platform.plat_sprite.height, loc[0].platform.plat_sprite.hBitmap);
+
+
+    if (player.hero_sprite.y + player.hero_sprite.height <= loc[player.current_location].platform.plat_sprite.y &&
+        player.hero_sprite.x + player.hero_sprite.width >= loc[player.current_location].platform.plat_sprite.x &&
+        player.hero_sprite.x <= loc[player.current_location].platform.plat_sprite.x + loc[player.current_location].platform.plat_sprite.width) {
+        player.hero_sprite.y = loc[player.current_location].platform.plat_sprite.y - player.hero_sprite.height;
+        gravity = 0;
+    }
+    else {
+
+        gravity = 15;
+    }
 }
+int jump = 0;
+
+
+void Jump() {
+    if (GetAsyncKeyState(VK_SPACE) && player.hero_sprite.y == window.height - player.hero_sprite.height)
+         jump+=70;
+    if (GetAsyncKeyState(VK_SPACE) && player.hero_sprite.y == loc[player.current_location].platform.plat_sprite.y)
+        jump += 70;
+    player.hero_sprite.y +=  gravity - jump;
+
+    player.hero_sprite.y = min(window.height - player.hero_sprite.height, player.hero_sprite.y);
+    jump *= 0.9;
+    /*if (GetAsyncKeyState(VK_SPACE) && player.hero_sprite.y == loc[player.current_location].platform.plat_sprite.y)
+        jump += 70;
+    player.hero_sprite.y += gravity - jump;
+
+    player.hero_sprite.y = min(loc[player.current_location].platform.plat_sprite.y, player.hero_sprite.y);
+    jump *= 0.9;*/
+
+}
+
 //void Jump() {
-//    int pl_jump = 0;
+//    int jump = 0;
+//    int gravity = 15;
 //    if (GetAsyncKeyState(VK_SPACE)) {
-//        int pl_jump = player.hero_sprite.y -= 50;
-//        
+//        jump = 1;
+//        if (jump != 1) {
+//            player.hero_sprite.y -= 50;
+//            player.hero_sprite.y += gravity;
+//            player.hero_sprite.y = min(window.height - player.hero_sprite.height, player.hero_sprite.y);
+//        }
 //    }
-//    
-//        int gravity = 15;
-//        player.hero_sprite.y += gravity;
+//    jump = 0;
 //
-//        pl_jump = min(window.height, pl_jump);
-//    
 //}
+
 
 void LimitRacket()
 {
@@ -289,7 +336,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         Sleep(16);//ждем 16 милисекунд (1/количество кадров в секунду)
 
         ProcessInput();//опрос клавиатуры
-        //Jump();
+        Jump();
         LimitRacket();//проверяем, чтобы ракетка не убежала за экран
     }
 
