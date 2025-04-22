@@ -195,9 +195,33 @@ void ShowBitmap(HDC hDC, int x, int y, int x1, int y1, HBITMAP hBitmapBall, bool
     DeleteDC(hMemDC); // Удаляем контекст памяти
 }
 int gravity = 15;
+int jump = 0;
+
+bool isJumping = false; // Переменная для отслеживания состояния прыжка
+
+void Jump() {
+    // Проверяем, находится ли герой на земле или на платформе
+    bool isOnGround = (player.hero_sprite.y + player.hero_sprite.height == loc[player.current_location].platform.plat_sprite.y ) ||
+        (player.hero_sprite.y == window.height - player.hero_sprite.height);
+
+    // Если герой на земле и не прыгает, разрешаем прыжок
+    if ( !isJumping && GetAsyncKeyState(VK_SPACE)) {
+        jump += 50;
+        isJumping = true;
+    }
+    if (isOnGround) {
+        isJumping = false;
+    }
+    player.hero_sprite.y += gravity - jump;
+    player.hero_sprite.y = min(window.height - player.hero_sprite.height, player.hero_sprite.y);
+    jump *= 0.9;
+}
 
 void ShowSprites()
 {
+    auto loca = loc[player.current_location].platform.plat_sprite;
+    auto pl_s = player.hero_sprite;
+
     ShowBitmap(window.context, 0, 0, window.width, window.height, loc[player.current_location].hBitmap);//задний фон
 
     for (int i = loc[player.current_location].items.size() - 1; i >= 0; i--) {
@@ -224,48 +248,29 @@ void ShowSprites()
         loc[player.current_location].platform.plat_sprite.hBitmap);
 
 
-    if (player.hero_sprite.y == loc[player.current_location].platform.plat_sprite.y + loc[player.current_location].platform.plat_sprite.height &&
-        player.hero_sprite.x + player.hero_sprite.width >= loc[player.current_location].platform.plat_sprite.x &&
-        player.hero_sprite.x <= loc[player.current_location].platform.plat_sprite.x + loc[player.current_location].platform.plat_sprite.width) {
-        player.hero_sprite.y > loc[player.current_location].platform.plat_sprite.y - player.hero_sprite.height;
-    }
-    else if (player.hero_sprite.y + player.hero_sprite.height <= loc[player.current_location].platform.plat_sprite.y &&
-        player.hero_sprite.x + player.hero_sprite.width >= loc[player.current_location].platform.plat_sprite.x &&
-        player.hero_sprite.x <= loc[player.current_location].platform.plat_sprite.x + loc[player.current_location].platform.plat_sprite.width) {
-        player.hero_sprite.y = loc[player.current_location].platform.plat_sprite.y - player.hero_sprite.height;
+   /* if (pl_s.y + pl_s.height <= loca.y && pl_s.x + pl_s.width >= loca.x && pl_s.x <= loca.x + loca.width) {
+
+        player.hero_sprite.y = loca.y - pl_s.height;
         gravity = 0;
+    }*/
+      if (pl_s.y + pl_s.height >= loca.y && pl_s.x + pl_s.width >= loca.x && pl_s.x <= loca.x + loca.width) {
+
+      
+        player.hero_sprite.y = max(window.height - pl_s.height, loca.y);
+       
+
     }
+  /*  else if (player.hero_sprite.y + player.hero_sprite.height <= loca.y &&
+        player.hero_sprite.x + player.hero_sprite.width >= loca.x &&
+        player.hero_sprite.x <= loca.x + loca.width) {
+
+        player.hero_sprite.y = loca.y - player.hero_sprite.height;
+
+        gravity = 0;
+    }*/
     else {
-        gravity = 15;
+        gravity = 30;
     }
-}
-int jump = 0;
-
-bool isJumping = false; // Переменная для отслеживания состояния прыжка
-
-void Jump() {
-    // Проверяем, находится ли герой на земле или на платформе
-    bool isOnGround = (player.hero_sprite.y + player.hero_sprite.height == loc[player.current_location].platform.plat_sprite.y) ||
-                      (player.hero_sprite.y == window.height - player.hero_sprite.height);
-
-    // Если герой на земле и не прыгает, разрешаем прыжок
-    if (isOnGround && !isJumping && GetAsyncKeyState(VK_SPACE)) {
-        jump += 70;
-        isJumping = true; 
-    }
-    if (isOnGround) {
-        isJumping = false;
-    }
-    player.hero_sprite.y += gravity - jump;
-    player.hero_sprite.y = min(window.height - player.hero_sprite.height, player.hero_sprite.y);
-    jump *= 0.9;
-    
-    //if (isJumping) {
-    //    // Если герой достиг земли или платформы, сбрасываем состояние прыжка
-    //    if (isOnGround) {
-    //        player.hero_sprite.y = loc[player.current_location].platform.plat_sprite.y; // Устанавливаем на платформу
-    //        isJumping = false; // Сбрасываем состояние прыжка
-    //        
 }
 
 
