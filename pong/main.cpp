@@ -69,7 +69,6 @@ HBITMAP hBack;// хэндл для фонового изображения
 //cекция кода
 
 auto Show(LPCSTR name) {
-    
     return (HBITMAP)LoadImageA(NULL, name, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 }
 
@@ -242,16 +241,46 @@ void ShowSprites()
 }
 int jump = 0;
 
-void Jump() {
-    if (GetAsyncKeyState(VK_SPACE) && player.hero_sprite.y == window.height - player.hero_sprite.height)
-         jump+=70;
-    /*if (GetAsyncKeyState(VK_SPACE) && player.hero_sprite.y == loc[player.current_location].platform.plat_sprite.y)
-        jump += 70;*/
-    player.hero_sprite.y +=  gravity - jump;
+bool isJumping = false; // Переменная для отслеживания состояния прыжка
 
+void Jump() {
+    // Проверяем, находится ли герой на земле или на платформе
+    bool isOnGround = (player.hero_sprite.y + player.hero_sprite.height == loc[player.current_location].platform.plat_sprite.y) ||
+                      (player.hero_sprite.y == window.height - player.hero_sprite.height);
+
+    // Если герой на земле и не прыгает, разрешаем прыжок
+    if (isOnGround && !isJumping && GetAsyncKeyState(VK_SPACE)) {
+        jump += 70;
+        isJumping = true; 
+    }
+    if (isOnGround) {
+        isJumping = false;
+    }
+    player.hero_sprite.y += gravity - jump;
     player.hero_sprite.y = min(window.height - player.hero_sprite.height, player.hero_sprite.y);
     jump *= 0.9;
+    
+    //if (isJumping) {
+    //    // Если герой достиг земли или платформы, сбрасываем состояние прыжка
+    //    if (isOnGround) {
+    //        player.hero_sprite.y = loc[player.current_location].platform.plat_sprite.y; // Устанавливаем на платформу
+    //        isJumping = false; // Сбрасываем состояние прыжка
+    //        
 }
+
+
+//void Jump() {
+//
+//    if (GetAsyncKeyState(VK_SPACE) && player.hero_sprite.y == loc[player.current_location].platform.plat_sprite.y)
+//        jump += 70;
+//    if (GetAsyncKeyState(VK_SPACE) && player.hero_sprite.y == window.height - player.hero_sprite.height)
+//         jump+=70;
+//
+//    player.hero_sprite.y +=  gravity - jump;
+//
+//    player.hero_sprite.y = min(window.height - player.hero_sprite.height, player.hero_sprite.y);
+//    jump *= 0.9;
+//}
 
 void LimitHero()
 {
