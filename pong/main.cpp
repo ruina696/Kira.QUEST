@@ -2,11 +2,13 @@
 //configuration::advanced::character set - not set
 //linker::input::additional dependensies Msimg32.lib; Winmm.lib
 
+
 #include "windows.h"
 #include <vector>
 #include <string>
 #include <time.h>
 #include <math.h>
+
 using namespace std;
 
 
@@ -39,6 +41,7 @@ struct player_ {
 player_ player;
 
 struct platform_ {
+    int number;
     sprite plat_sprite;
 };
 
@@ -68,78 +71,93 @@ HBITMAP hBack;// хэндл для фонового изображения
 
 //cекция кода
 
+/// <summary>
+/// Метод, выводящий спрайт
+/// </summary>
+/// <param name="name">имя файла спрайта</param>
+/// <returns></returns>
 auto Show(LPCSTR name) {
     return (HBITMAP)LoadImageA(NULL, name, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 }
+/// <summary>
+/// Метод, выводящий спрайты предметов
+/// </summary>
+/// <param name="name">имя предмета</param>
+/// <param name="x">координата х</param>
+/// <param name="y">координата у</param>
+/// <param name="height">высота</param>
+/// <param name="width">ширина</param>
+/// <param name="it_name">имя файла спрайта</param>
+void ItemInfo(string name, int x, int y, int height, int width, LPCSTR it_name)
+{
+    item_ i;
+    i.name = name;
+    i.Sprite.x = x;
+    i.Sprite.y = y;
+    i.Sprite.height = height;
+    i.Sprite.width = width;
+    i.Sprite.hBitmap = Show(it_name);
+    itemLib.push_back(i);
+}
+/// <summary>
+/// Метод, выводящий спрайты платформ
+/// </summary>
+/// <param name="numb">номер локации</param>
+/// <param name="x">координата х</param>
+/// <param name="y">координата у</param>
+/// <param name="height">высота</param>
+/// <param name="width">ширина</param>
+void PlatformInfo(int numb, int x, int y, int height, int width)
+{
+    loc[numb].platform.plat_sprite.x = x;
+    loc[numb].platform.plat_sprite.y = y;
+    loc[numb].platform.plat_sprite.height = height;
+    loc[numb].platform.plat_sprite.width = width;
+    loc[numb].platform.plat_sprite.hBitmap = Show("platform.bmp");
+}
+/// <summary>
+/// Метод, выводящий локацию с порталами
+/// </summary>
+/// <param name="numb">номер локации</param>
+/// <param name="loc_name">имя файла спрайта</param>
+/// <param name="l_port">номер локации слева</param>
+/// <param name="r_port">номер локации справа</param>
+void LocInfo(int numb, LPCSTR loc_name, int l_port, int r_port) 
+{
+    loc[numb].hBitmap = Show(loc_name);
+    loc[numb].left_portal = l_port;
+    loc[numb].right_portal = r_port;
+}
+
+//void ChangeHeroSprite() 
+//{
+//    if (itemLib[(int)itemID::axe])
+//}
 
 void InitGame()
 {
-    item_ i;
-
-    i.name = "axe";
-    i.Sprite.x = 1150;
-    i.Sprite.y = window.height - 50;;
-    i.Sprite.height = 50;
-    i.Sprite.width = 50;
-    i.Sprite.hBitmap = Show("axe.bmp");
-    itemLib.push_back(i);
-
-    i.name = "hemlet";
-    i.Sprite.x = 150;
-    i.Sprite.y = window.height - 50;;
-    i.Sprite.height = 50;
-    i.Sprite.width = 50;
-    i.Sprite.hBitmap = Show("hemlet.bmp");
-    itemLib.push_back(i);
-
-    i.name = "sword";
-    i.Sprite.x = 850;
-    i.Sprite.y = window.height - 50;;
-    i.Sprite.height = 50;
-    i.Sprite.width = 50;
-    i.Sprite.hBitmap = Show("sword.bmp");
-    itemLib.push_back(i);
+    ItemInfo("axe", window.width / 2 , window.height - 100, 100, 100, "axe.bmp");
+    ItemInfo("hemlet", window.width / 3, window.height - 100, 100, 100, "hemlet.bmp");
+    ItemInfo("sword", window.width / 7, window.height - 100, 100, 100, "sword.bmp");
 
     loc[0].items.push_back(itemLib[(int)itemID::axe]);
     loc[0].items.push_back(itemLib[(int)itemID::sword]);
     loc[2].items.push_back(itemLib[(int)itemID::hemlet]);
 
-    loc[0].platform.plat_sprite.x = 1200;
-    loc[0].platform.plat_sprite.y = window.height - 250;
-    loc[0].platform.plat_sprite.height = 50;
-    loc[0].platform.plat_sprite.width = 500;
-    loc[0].platform.plat_sprite.hBitmap = Show("racket.bmp");
+    PlatformInfo(0, window.width / 2, window.height - 250, 60, 600);
+    PlatformInfo(1, window.width / 7, window.height - 250, 60, 600);
+    PlatformInfo(2, window.width / 4, window.height - 250, 60, 600);
 
-    loc[1].platform.plat_sprite.x = 100;
-    loc[1].platform.plat_sprite.y = window.height - 250;
-    loc[1].platform.plat_sprite.height = 50;
-    loc[1].platform.plat_sprite.width = 500;
-    loc[1].platform.plat_sprite.hBitmap = Show("racket.bmp");
-
-    loc[2].platform.plat_sprite.x = 700;
-    loc[2].platform.plat_sprite.y = window.height - 250;
-    loc[2].platform.plat_sprite.height = 50;
-    loc[2].platform.plat_sprite.width = 500;
-    loc[2].platform.plat_sprite.hBitmap = Show("racket.bmp");
-
-    loc[0].hBitmap = Show("loc0.bmp");
-    loc[0].left_portal = 2;
-    loc[0].right_portal = 1;
-
-    loc[1].hBitmap = Show("loc1.bmp");
-    loc[1].left_portal = 0;
-    loc[1].right_portal = 2;
-
-    loc[2].hBitmap = Show("loc2.bmp");
-    loc[2].left_portal = 1;
-    loc[2].right_portal = 0;
+    LocInfo(0, "loc0.bmp", 2, 1);
+    LocInfo(1, "loc1.bmp", 0, 2);
+    LocInfo(2, "loc2.bmp", 1, 0);
 
     player.current_location = 0;
     player.hero_sprite.x = 100;
-    player.hero_sprite.y = window.height - 50;
-    player.hero_sprite.width = 50;
-    player.hero_sprite.height = 50;
-    player.hero_sprite.hBitmap = Show("racket.bmp");
+    player.hero_sprite.y = window.height - 100;
+    player.hero_sprite.width = 100;
+    player.hero_sprite.height = 100;
+    player.hero_sprite.hBitmap = Show("hero_right.bmp");
 }
 
 void ShowScore()
@@ -155,15 +173,20 @@ void ShowScore()
     _itoa_s(player.life, txt, 10);//преобразование числовой переменной в текст. текст окажется в переменной txt
     TextOutA(window.context, 10, 10, "Health", 6);
     TextOutA(window.context, 200, 10, (LPCSTR)txt, strlen(txt));
-
     _itoa_s(game.balls, txt, 10);
     TextOutA(window.context, 10, 100, "ITEMS", 5);
 }
 
 void ProcessInput()
 {
-    if (GetAsyncKeyState(VK_LEFT)) player.hero_sprite.x -= 15;
-    if (GetAsyncKeyState(VK_RIGHT)) player.hero_sprite.x += 15;
+    if (GetAsyncKeyState('A')) {
+        player.hero_sprite.hBitmap = Show("hero_left.bmp");
+        player.hero_sprite.x -= 15;
+    }
+    if (GetAsyncKeyState('D')) {
+        player.hero_sprite.hBitmap = Show("hero_right.bmp");
+        player.hero_sprite.x += 15;
+    }
 }
 
 
@@ -194,18 +217,17 @@ void ShowBitmap(HDC hDC, int x, int y, int x1, int y1, HBITMAP hBitmapBall, bool
 
     DeleteDC(hMemDC); // Удаляем контекст памяти
 }
+
 int gravity = 15;
 int jump = 0;
 
-bool isJumping = false; // Переменная для отслеживания состояния прыжка
+bool isJumping = false;
 
 void Jump() {
-    // Проверяем, находится ли герой на земле или на платформе
     bool isOnGround = (player.hero_sprite.y + player.hero_sprite.height == loc[player.current_location].platform.plat_sprite.y ) ||
         (player.hero_sprite.y == window.height - player.hero_sprite.height);
 
-    // Если герой на земле и не прыгает, разрешаем прыжок
-    if ( !isJumping && GetAsyncKeyState(VK_SPACE)) {
+    if (!isJumping && GetAsyncKeyState('W')) {
         jump += 50;
         isJumping = true;
     }
@@ -238,7 +260,7 @@ void ShowSprites()
 
     if (!player.player_items.empty()) {
        for (int i = 0; i < player.player_items.size(); i++) {
-           ShowBitmap(window.context, 200 + i * 50, 100, player.player_items[i].Sprite.width, player.player_items[i].Sprite.height, player.player_items[i].Sprite.hBitmap);
+           ShowBitmap(window.context, 200 + i * 120, 100, player.player_items[i].Sprite.width, player.player_items[i].Sprite.height, player.player_items[i].Sprite.hBitmap);
         }
     }
 
