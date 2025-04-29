@@ -77,12 +77,6 @@ struct location_ {
 
 location_ loc[5];
 
-//void PlatformImage(int numb, int plat_x, int plat_y, int plat_height, int plat_width)
-//{
-//    Platform pl( plat_x, plat_y, plat_height, plat_width );
-//    loc[numb].plats.emplace_back(pl);
-//}
-
 struct {
     int score, balls;//количество набранных очков и оставшихся "жизней"
     bool action = false;//состояние - ожидание (игрок должен нажать пробел) или игра
@@ -119,22 +113,6 @@ void ItemInfo(string name, int x, int y, int height, int width, LPCSTR it_name)
     itemLib.push_back(i);
 }
 /// <summary>
-/// Метод, выводящий спрайты платформ
-/// </summary>
-/// <param name="numb">номер локации</param>
-/// <param name="x">координата х</param>
-/// <param name="y">координата у</param>
-/// <param name="height">высота</param>
-/// <param name="width">ширина</param>
-//void PlatformInfo(int numb, int x, int y)
-//{
-//    loc[numb].platform.plat_sprite.x = x;
-//    loc[numb].platform.plat_sprite.y = y;
-//    loc[numb].platform.plat_sprite.height = 60;
-//    loc[numb].platform.plat_sprite.width = 600;
-//    loc[numb].platform.plat_sprite.hBitmap = Show("platform.bmp");
-//}
-/// <summary>
 /// Метод, выводящий локацию с порталами
 /// </summary>
 /// <param name="numb">номер локации</param>
@@ -159,19 +137,22 @@ void InitGame()
     loc[2].items.push_back(itemLib[(int)itemID::hemlet]);
 
     loc[0].plats.emplace_back(window.width / 1.9, window.height - 250, 60, 600);
-    //loc[0].plats.emplace_back(window.width / 6, window.height - 350, 60, 600);
+    /*loc[0].plats.emplace_back(window.width / 6, window.height - 350, 60, 600);*/
     loc[1].plats.emplace_back(0, window.height - 250, 60, 900);
-    loc[1].plats.emplace_back(window.width / 1.7, window.height - 450, 60, window.width - window.width / 1.7);
-    loc[2].plats.emplace_back(window.width / 6, window.height - 250, 60, 600);
-    loc[2].plats.emplace_back(window.width / 1.8, window.height - 450, 60, 600);
-    loc[2].plats.emplace_back(window.width / 8, window.height - 650, 60, 600);
+    loc[1].plats.emplace_back(window.width / 1.7, window.height - 250, 60, window.width - window.width / 1.7);
+    loc[2].plats.emplace_back(100, window.height - 250, 60, 200);
+    loc[2].plats.emplace_back(400, window.height - 250, 60, 200);
+    loc[2].plats.emplace_back(700, window.height - 250, 60, 200);
+    //loc[2].plats.emplace_back(window.width / 6, window.height - 250, 60, 600);
+    //loc[2].plats.emplace_back(window.width / 1.8, window.height - 450, 60, 600);
+    //loc[2].plats.emplace_back(window.width / 8, window.height - 650, 60, 600);
 
     LocInfo(0, "loc0.bmp", 2, 1);
     LocInfo(1, "loc1.bmp", 0, 2);
     LocInfo(2, "loc2.bmp", 1, 0);
 
     player.current_location = 0;
-    player.hero_sprite.x = 2000;
+    player.hero_sprite.x = 100;
     player.hero_sprite.y = window.height - 100;
     player.hero_sprite.width = 100;
     player.hero_sprite.height = 100;
@@ -225,7 +206,7 @@ void ShowBitmap(HDC hDC, int x, int y, int x1, int y1, HBITMAP hBitmapBall, bool
 
 int gravity = 15;
 int jump = 0;
-bool isJumping = false;
+
 
 void Collusion() 
 {
@@ -252,6 +233,7 @@ void Collusion()
         }
     }
 }
+bool isJumping = false;
 
 void ProcessInput()
 {
@@ -276,14 +258,10 @@ void ProcessInput()
             jump += 40;
             isJumping = true;
         }
-        if (isOnGround) {
-            isJumping = false;
-        }
-        if (isOnPlatform) {
+        if ((isOnGround) || (isOnPlatform)) {
             isJumping = false;
         }
         player.hero_sprite.y += gravity - jump;
-        //Sleep(1);
         player.hero_sprite.y = min(window.height - player.hero_sprite.height, player.hero_sprite.y);
         jump *= 0.91;
     }
@@ -365,7 +343,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         ShowSprites();//рисуем фон, героя, предметы и платформы
         ShowScore();//рисуем очик и жизни
         BitBlt(window.device_context, 0, 0, window.width, window.height, window.context, 0, 0, SRCCOPY);//копируем буфер в окно
-        Sleep(16);//ждем 16 милисекунд (1/количество кадров в секунду)
+        Sleep(13);//ждем 16 милисекунд (1/количество кадров в секунду)
 
         ProcessInput();//опрос клавиатуры
         LimitHero();//проверяем, чтобы ракетка не убежала за экран
