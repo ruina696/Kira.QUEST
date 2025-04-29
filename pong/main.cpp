@@ -157,10 +157,9 @@ void InitGame()
     loc[0].items.push_back(itemLib[(int)itemID::axe]);
     loc[0].items.push_back(itemLib[(int)itemID::sword]);
     loc[2].items.push_back(itemLib[(int)itemID::hemlet]);
-    loc[0].plats.emplace_back(0, 1, 30, 20);
 
-    loc[0].plats.emplace_back(window.width / 1.9, window.height - 150, 60, 600);
-    //loc[0].plats.emplace_back(window.width / 11, window.height - 250, 60, 600);
+    loc[0].plats.emplace_back(window.width / 1.9, window.height - 250, 60, 600);
+    //loc[0].plats.emplace_back(window.width / 6, window.height - 350, 60, 600);
     loc[1].plats.emplace_back(0, window.height - 250, 60, 900);
     loc[1].plats.emplace_back(window.width / 1.7, window.height - 450, 60, window.width - window.width / 1.7);
     loc[2].plats.emplace_back(window.width / 6, window.height - 250, 60, 600);
@@ -172,7 +171,7 @@ void InitGame()
     LocInfo(2, "loc2.bmp", 1, 0);
 
     player.current_location = 0;
-    player.hero_sprite.x = 100;
+    player.hero_sprite.x = 2000;
     player.hero_sprite.y = window.height - 100;
     player.hero_sprite.width = 100;
     player.hero_sprite.height = 100;
@@ -224,48 +223,21 @@ void ShowBitmap(HDC hDC, int x, int y, int x1, int y1, HBITMAP hBitmapBall, bool
     DeleteDC(hMemDC); // Удаляем контекст памяти
 }
 
-int gravity = 5;
+int gravity = 15;
 int jump = 0;
 bool isJumping = false;
-void ShowSprites()
+
+void Collusion() 
 {
-    //задний фон
-    ShowBitmap(window.context, 0, 0, window.width, window.height, loc[player.current_location].hBitmap);
-
-    for (int i = 0; i < loc[player.current_location].items.size(); i++) {
-        auto item = loc[player.current_location].items[i].Sprite;
-        ShowBitmap(window.context, item.x, item.y, item.width, item.height, item.hBitmap);
-
-        if (player.hero_sprite.x + player.hero_sprite.width >= item.x && player.hero_sprite.x <= item.x + item.width &&
-            player.hero_sprite.y + player.hero_sprite.height >= item.y) {
-
-            player.player_items.push_back(loc[player.current_location].items[i]);
-            loc[player.current_location].items.erase(loc[player.current_location].items.begin() + i);
-        }
-    }
-
-    if (!player.player_items.empty()) {
-        for (int i = 0; i < player.player_items.size(); i++) {
-            ShowBitmap(window.context, 200 + i * 120, 100, player.player_items[i].Sprite.width, player.player_items[i].Sprite.height, player.player_items[i].Sprite.hBitmap);
-        }
-    }
-
-    ShowBitmap(window.context, player.hero_sprite.x, player.hero_sprite.y, player.hero_sprite.width, player.hero_sprite.height, player.hero_sprite.hBitmap);// ракетка игрока
-    //ShowBitmap(window.context, loc[player.current_location].platform.plat_sprite.x, loc[player.current_location].platform.plat_sprite.y,
-    //    loc[player.current_location].platform.plat_sprite.width, loc[player.current_location].platform.plat_sprite.height, 
-    //    loc[player.current_location].platform.plat_sprite.hBitmap);
-
-    //auto plat = loc[player.current_location].platform.plat_sprite;
-
     auto pl_s = player.hero_sprite;
-
+    
     for (int i = 0; i < loc[player.current_location].plats.size(); i++)
     {
         auto platform = loc[player.current_location].plats[i].pl_sprite;
-        ShowBitmap(window.context, platform.x, platform.y, platform.width, platform.height, platform.hBitmap);
-
-        if (pl_s.y + pl_s.height >= platform.y && pl_s.y <= platform.y && pl_s.x + pl_s.width >= platform.x && //над платформой
-            pl_s.x <= platform.x + platform.width) {
+        if ((pl_s.y + pl_s.height >= platform.y && 
+            pl_s.y <= platform.y) && 
+            (pl_s.x + pl_s.width >= platform.x && //над платформой
+            pl_s.x <= platform.x + platform.width)) {
 
             player.hero_sprite.y = platform.y - player.hero_sprite.height;
             gravity = 0;
@@ -276,7 +248,7 @@ void ShowSprites()
             player.hero_sprite.y = platform.y + platform.height;
         }
         else {
-            gravity = 10;
+            gravity = 15;
         }
     }
 }
@@ -285,11 +257,11 @@ void ProcessInput()
 {
     if (GetAsyncKeyState('A')) {
         player.hero_sprite.hBitmap = Show("hero_left.bmp");
-        player.hero_sprite.x -= 15;
+        player.hero_sprite.x -= 25;
     }
     if (GetAsyncKeyState('D')) {
         player.hero_sprite.hBitmap = Show("hero_right.bmp");
-        player.hero_sprite.x += 15;
+        player.hero_sprite.x += 25;
     }
     auto pl_s = player.hero_sprite;
 
@@ -301,7 +273,7 @@ void ProcessInput()
         bool isOnPlatform = (pl_s.y + pl_s.height == platform.y);
 
         if (!isJumping && GetAsyncKeyState('W')) {
-            jump += 10;
+            jump += 40;
             isJumping = true;
         }
         if (isOnGround) {
@@ -313,24 +285,40 @@ void ProcessInput()
         player.hero_sprite.y += gravity - jump;
         //Sleep(1);
         player.hero_sprite.y = min(window.height - player.hero_sprite.height, player.hero_sprite.y);
-        jump *= 0.999999;
+        jump *= 0.91;
     }
 }
 
+void ShowSprites()
+{
+    ShowBitmap(window.context, 0, 0, window.width, window.height, loc[player.current_location].hBitmap);//задний фон
 
+    for (int i = 0; i < loc[player.current_location].items.size(); i++) {
+        auto item = loc[player.current_location].items[i].Sprite;
+        ShowBitmap(window.context, item.x, item.y, item.width, item.height, item.hBitmap);//предметы на карте
 
+        if (player.hero_sprite.x + player.hero_sprite.width >= item.x && player.hero_sprite.x <= item.x + item.width &&
+            player.hero_sprite.y + player.hero_sprite.height >= item.y) {
 
+            player.player_items.push_back(loc[player.current_location].items[i]);
+            loc[player.current_location].items.erase(loc[player.current_location].items.begin() + i);
+        }
+    }
 
+    if (!player.player_items.empty()) {
+        for (int i = 0; i < player.player_items.size(); i++) {
+            ShowBitmap(window.context, 200 + i * 120, 100, player.player_items[i].Sprite.width, player.player_items[i].Sprite.height, player.player_items[i].Sprite.hBitmap);//предметы в инвентаре
+        }
+    }
 
-  /*  else if (player.hero_sprite.y + player.hero_sprite.height <= loca.y &&
-        player.hero_sprite.x + player.hero_sprite.width >= loca.x &&
-        player.hero_sprite.x <= loca.x + loca.width) {
+    ShowBitmap(window.context, player.hero_sprite.x, player.hero_sprite.y, player.hero_sprite.width, player.hero_sprite.height, player.hero_sprite.hBitmap);// ракетка игрока
 
-        player.hero_sprite.y = loca.y - player.hero_sprite.height;
-
-        gravity = 0;
-    }*/
-
+    for (int i = 0; i < loc[player.current_location].plats.size(); i++)
+    {
+        auto platform = loc[player.current_location].plats[i].pl_sprite;
+        ShowBitmap(window.context, platform.x, platform.y, platform.width, platform.height, platform.hBitmap);//платформы
+    }
+}
 
 void LimitHero()
 {
@@ -381,6 +369,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         ProcessInput();//опрос клавиатуры
         LimitHero();//проверяем, чтобы ракетка не убежала за экран
+        Collusion();//коллизия
     }
 
 }
