@@ -18,8 +18,6 @@ typedef struct {
     HBITMAP hBitmap;//хэндл к спрайту шарика 
 } sprite;
 
-
-
 enum class itemID {
     axe,hemlet,sword
 };
@@ -41,8 +39,31 @@ struct player_ {
 player_ player;
 
 struct platform_ {
-    int number;
     sprite plat_sprite;
+};
+
+/// <summary>
+/// Метод, выводящий спрайт
+/// </summary>
+/// <param name="name">имя файла спрайта</param>
+/// <returns></returns>
+auto Show(LPCSTR name) {
+    return (HBITMAP)LoadImageA(NULL, name, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+}
+
+class Platform
+{
+public:
+    sprite pl_sprite;
+
+    Platform( int plat_x, int plat_y, int plat_height, int plat_width )
+    {
+        pl_sprite.x = plat_x;
+        pl_sprite.y = plat_y;
+        pl_sprite.height = plat_height;
+        pl_sprite.width = plat_width;
+        pl_sprite.hBitmap = Show("platform.bmp");
+    }
 };
 
 struct location_ {
@@ -50,11 +71,17 @@ struct location_ {
     int left_portal;
     int right_portal;
     platform_ platform;
-    vector<platform_> plats;
+    vector<Platform> plats;
     vector <item_> items;
 };
 
 location_ loc[5];
+
+void PlatformImage(int numb, int plat_x, int plat_y, int plat_height, int plat_width)
+{
+    Platform pl( plat_x, plat_y, plat_height, plat_width );
+    loc[numb].plats.emplace_back(pl);
+}
 
 struct {
     int score, balls;//количество набранных очков и оставшихся "жизней"
@@ -71,14 +98,6 @@ HBITMAP hBack;// хэндл для фонового изображения
 
 //cекция кода
 
-/// <summary>
-/// Метод, выводящий спрайт
-/// </summary>
-/// <param name="name">имя файла спрайта</param>
-/// <returns></returns>
-auto Show(LPCSTR name) {
-    return (HBITMAP)LoadImageA(NULL, name, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-}
 /// <summary>
 /// Метод, выводящий спрайты предметов
 /// </summary>
@@ -107,14 +126,14 @@ void ItemInfo(string name, int x, int y, int height, int width, LPCSTR it_name)
 /// <param name="y">координата у</param>
 /// <param name="height">высота</param>
 /// <param name="width">ширина</param>
-void PlatformInfo(int numb, int x, int y)
-{
-    loc[numb].platform.plat_sprite.x = x;
-    loc[numb].platform.plat_sprite.y = y;
-    loc[numb].platform.plat_sprite.height = 60;
-    loc[numb].platform.plat_sprite.width = 600;
-    loc[numb].platform.plat_sprite.hBitmap = Show("platform.bmp");
-}
+//void PlatformInfo(int numb, int x, int y)
+//{
+//    loc[numb].platform.plat_sprite.x = x;
+//    loc[numb].platform.plat_sprite.y = y;
+//    loc[numb].platform.plat_sprite.height = 60;
+//    loc[numb].platform.plat_sprite.width = 600;
+//    loc[numb].platform.plat_sprite.hBitmap = Show("platform.bmp");
+//}
 /// <summary>
 /// Метод, выводящий локацию с порталами
 /// </summary>
@@ -139,9 +158,18 @@ void InitGame()
     loc[0].items.push_back(itemLib[(int)itemID::sword]);
     loc[2].items.push_back(itemLib[(int)itemID::hemlet]);
 
-    PlatformInfo(0, window.width / 2, window.height - 250);
-    PlatformInfo(1, window.width / 7, window.height - 250);
-    PlatformInfo(2, window.width / 4, window.height - 250);
+    PlatformImage(0, window.width / 1.9, window.height - 250, 60, 600);
+    PlatformImage(0, window.width / 11, window.height - 450, 60, 600);
+    PlatformImage(1, 0, window.height - 250, 60, 900);
+    PlatformImage(1, window.width / 1.7, window.height - 450, 60, window.width - window.width / 1.7);
+    PlatformImage(2, window.width / 6, window.height - 250, 60, 600);
+    PlatformImage(2, window.width / 1.8, window.height - 450, 60, 600);
+    PlatformImage(2, window.width / 8, window.height - 650, 60, 600);
+
+    //PlatformInfo(0, window.width / 2, window.height - 250);
+    //PlatformInfo(0, window.width / 6, window.height - 250);
+    //PlatformInfo(1, window.width / 7, window.height - 250);
+    //PlatformInfo(2, window.width / 4, window.height - 250);
 
     LocInfo(0, "loc0.bmp", 2, 1);
     LocInfo(1, "loc1.bmp", 0, 2);
@@ -233,15 +261,13 @@ void ShowBitmap(HDC hDC, int x, int y, int x1, int y1, HBITMAP hBitmapBall, bool
 
 void ShowSprites()
 {
-    auto plat = loc[player.current_location].platform.plat_sprite;
-    auto pl_s = player.hero_sprite;
-
-    ShowBitmap(window.context, 0, 0, window.width, window.height, loc[player.current_location].hBitmap);//задний фон
+    //задний фон
+    ShowBitmap(window.context, 0, 0, window.width, window.height, loc[player.current_location].hBitmap);
 
     for (int i = loc[player.current_location].items.size() - 1; i >= 0; i--) {
         auto item = loc[player.current_location].items[i].Sprite;
-        //ShowBitmap(window.context, item.x, item.y, item.width, item.height, item.hBitmap);
         ShowBitmap(window.context, item.x, item.y, item.width, item.height, item.hBitmap);
+
         if (player.hero_sprite.x + player.hero_sprite.width >= item.x  && player.hero_sprite.x <= item.x + item.width &&
             player.hero_sprite.y + player.hero_sprite.height >= item.y){
 
@@ -257,22 +283,31 @@ void ShowSprites()
     }
 
     ShowBitmap(window.context, player.hero_sprite.x, player.hero_sprite.y, player.hero_sprite.width, player.hero_sprite.height, player.hero_sprite.hBitmap );// ракетка игрока
-    ShowBitmap(window.context, loc[player.current_location].platform.plat_sprite.x, loc[player.current_location].platform.plat_sprite.y,
-        loc[player.current_location].platform.plat_sprite.width, loc[player.current_location].platform.plat_sprite.height, 
-        loc[player.current_location].platform.plat_sprite.hBitmap);
+    //ShowBitmap(window.context, loc[player.current_location].platform.plat_sprite.x, loc[player.current_location].platform.plat_sprite.y,
+    //    loc[player.current_location].platform.plat_sprite.width, loc[player.current_location].platform.plat_sprite.height, 
+    //    loc[player.current_location].platform.plat_sprite.hBitmap);
 
+    //auto plat = loc[player.current_location].platform.plat_sprite;
 
-    if (pl_s.y + pl_s.height <= plat.y && pl_s.x + pl_s.width >= plat.x && pl_s.x <= plat.x + plat.width) {
+    auto pl_s = player.hero_sprite;
 
-        //gravity = 0;
-        //player.hero_sprite.y = plat.y - pl_s.height;
-        player.hero_sprite.y = 900;
+    for (int i = loc[player.current_location].plats.size() - 1; i >= 0; i--) 
+    {
+        auto platform = loc[player.current_location].plats[i].pl_sprite;
+        ShowBitmap(window.context, platform.x, platform.y, platform.width, platform.height, platform.hBitmap);
+
+        if (pl_s.y + pl_s.height <= platform.y && pl_s.x + pl_s.width >= platform.x &&
+            pl_s.x <= platform.x + platform.width) {
+
+            player.hero_sprite.y = window.height - 500;
+        }
+        if (pl_s.y >= platform.y + platform.height && pl_s.x + pl_s.width >= platform.x &&
+            pl_s.x <= platform.x + platform.width) {
+
+            player.hero_sprite.y = window.height - 200;
+        }
     }
-    if (pl_s.y >= plat.y + plat.height && pl_s.x + pl_s.width >= plat.x && pl_s.x <= plat.x + plat.width) {
 
-        //player.hero_sprite.y = min(window.height - pl_s.height, plat.y);
-        player.hero_sprite.y = window.height - 200;
-    }
   /*  else if (player.hero_sprite.y + player.hero_sprite.height <= loca.y &&
         player.hero_sprite.x + player.hero_sprite.width >= loca.x &&
         player.hero_sprite.x <= loca.x + loca.width) {
@@ -281,7 +316,6 @@ void ShowSprites()
 
         gravity = 0;
     }*/
-    
 }
 
 void LimitHero()
