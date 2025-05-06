@@ -136,13 +136,13 @@ void InitGame()
     loc[0].items.push_back(itemLib[(int)itemID::sword]);
     loc[2].items.push_back(itemLib[(int)itemID::hemlet]);
 
-    loc[0].plats.emplace_back(window.width / 1.9, window.height - 250, 60, 600);
+    loc[0].plats.emplace_back(window.width / 1.9, window.height - 200, 60, 600);
     /*loc[0].plats.emplace_back(window.width / 6, window.height - 350, 60, 600);*/
-    loc[1].plats.emplace_back(0, window.height - 250, 60, 900);
-    loc[1].plats.emplace_back(window.width / 1.7, window.height - 250, 60, window.width - window.width / 1.7);
-    loc[2].plats.emplace_back(100, window.height - 250, 60, 200);
-    loc[2].plats.emplace_back(400, window.height - 250, 60, 200);
-    loc[2].plats.emplace_back(700, window.height - 250, 60, 200);
+    loc[1].plats.emplace_back(0, window.height - 200, 60, 900);
+    loc[1].plats.emplace_back(window.width / 1.7, window.height - 200, 60, window.width - window.width / 1.7);
+    loc[2].plats.emplace_back(100, window.height - 200, 60, 200);
+    loc[2].plats.emplace_back(600, window.height - 200, 60, 200);
+    loc[2].plats.emplace_back(1200, window.height - 200, 60, 200);
     //loc[2].plats.emplace_back(window.width / 6, window.height - 250, 60, 600);
     //loc[2].plats.emplace_back(window.width / 1.8, window.height - 450, 60, 600);
     //loc[2].plats.emplace_back(window.width / 8, window.height - 650, 60, 600);
@@ -208,31 +208,77 @@ int gravity = 15;
 int jump = 0;
 
 
-void Collusion() 
+void Collusion()
 {
     auto pl_s = player.hero_sprite;
-    
+
     for (int i = 0; i < loc[player.current_location].plats.size(); i++)
     {
         auto platform = loc[player.current_location].plats[i].pl_sprite;
-        if ((pl_s.y + pl_s.height >= platform.y && 
-            pl_s.y <= platform.y) && 
-            (pl_s.x + pl_s.width >= platform.x && //над платформой
-            pl_s.x <= platform.x + platform.width)) {
 
-            player.hero_sprite.y = platform.y - player.hero_sprite.height;
-            gravity = 0;
-        }
-        else if (pl_s.y <= platform.y + platform.height && //под платформой
-            pl_s.y + pl_s.height >= platform.y + platform.height &&
-            pl_s.x + pl_s.width >= platform.x &&
-            pl_s.x <= platform.x + platform.width) {
+        if (pl_s.y <= platform.y + platform.height &&
+            pl_s.y + pl_s.height >= platform.y &&
+            pl_s.x <= platform.x + platform.width &&
+            pl_s.x + pl_s.width >= platform.x) {
 
-            player.hero_sprite.y = platform.y + platform.height;
+        int UP = abs(platform.y - (pl_s.y + pl_s.height));
+        int DOWN = abs((platform.y + platform.height) - pl_s.y);
+        int over_Y = min(UP, DOWN);
+
+        int LEFT = abs(platform.x - (pl_s.x + pl_s.width));
+        int RIGHT = abs(platform.x + platform.width - pl_s.x);
+        int over_X = min(LEFT, RIGHT);
+
+        if (over_X < over_Y) {
+
+            if (LEFT < RIGHT) {
+                player.hero_sprite.x = platform.x - pl_s.width;
+            }
+            else {
+                player.hero_sprite.x = platform.x + platform.width;
+            }
         }
-        else {
-            gravity = 15;
+        else  {
+
+            if (UP < DOWN) {
+                player.hero_sprite.y = min(platform.y - player.hero_sprite.height , player.hero_sprite.y);
+                
+            }
+            else {
+                
+                player.hero_sprite.y = platform.y + platform.height;
+            }
         }
+        
+            /*gravity = 15;*/
+        
+    }
+
+
+
+
+        //if ()
+        //    
+        //    ((pl_s.y + pl_s.height >= platform.y &&
+        //    pl_s.y <= platform.y) &&
+        //    (pl_s.x + pl_s.width >= platform.x && //над платформой
+        //        pl_s.x <= platform.x + platform.width)) {
+
+        //    player.hero_sprite.y = loc[player.current_location].plats[i].pl_sprite.y 
+        //        - player.hero_sprite.height;
+        //    gravity = 0;
+        //}
+        //else if (pl_s.y <= platform.y + platform.height && //под платформой
+        //    pl_s.y + pl_s.height >= platform.y + platform.height &&
+        //    pl_s.x + pl_s.width >= platform.x &&
+        //    pl_s.x <= platform.x + platform.width) {
+
+        //    player.hero_sprite.y = loc[player.current_location].plats[i].pl_sprite.y 
+        //        + loc[player.current_location].plats[i].pl_sprite.height;
+        //}
+        //else {
+        //    gravity = 15;
+        //}
     }
 }
 bool isJumping = false;
@@ -263,10 +309,10 @@ void ProcessInput()
         if ((isOnGround) || (isOnPlatform)) {
             isJumping = false;
         }
+    }
         player.hero_sprite.y += gravity - jump;
         player.hero_sprite.y = min(window.height - player.hero_sprite.height, player.hero_sprite.y);
         jump *= 0.8;
-    }
 }
 
 void ShowSprites()
@@ -347,9 +393,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         BitBlt(window.device_context, 0, 0, window.width, window.height, window.context, 0, 0, SRCCOPY);//копируем буфер в окно
         Sleep(13);//ждем 16 милисекунд (1/количество кадров в секунду)
 
+        Collusion();//коллизия
         ProcessInput();//опрос клавиатуры
         LimitHero();//проверяем, чтобы ракетка не убежала за экран
-        Collusion();//коллизия
     }
 
 }
