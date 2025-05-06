@@ -223,7 +223,9 @@ void Collusion()
             player.hero_sprite.y = platform.y - player.hero_sprite.height;
             gravity = 0;
         }
-        else if (pl_s.y <= platform.y + platform.height && pl_s.y + pl_s.height >= platform.y + platform.height && pl_s.x + pl_s.width >= platform.x &&//под платформой
+        else if (pl_s.y <= platform.y + platform.height && //под платформой
+            pl_s.y + pl_s.height >= platform.y + platform.height &&
+            pl_s.x + pl_s.width >= platform.x &&
             pl_s.x <= platform.x + platform.width) {
 
             player.hero_sprite.y = platform.y + platform.height;
@@ -255,7 +257,7 @@ void ProcessInput()
         bool isOnPlatform = (pl_s.y + pl_s.height == platform.y);
 
         if (!isJumping && GetAsyncKeyState('W')) {
-            jump += 40;
+            jump = 70;
             isJumping = true;
         }
         if ((isOnGround) || (isOnPlatform)) {
@@ -263,7 +265,7 @@ void ProcessInput()
         }
         player.hero_sprite.y += gravity - jump;
         player.hero_sprite.y = min(window.height - player.hero_sprite.height, player.hero_sprite.y);
-        jump *= 0.91;
+        jump *= 0.8;
     }
 }
 
