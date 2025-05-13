@@ -11,6 +11,7 @@
 
 using namespace std;
 
+DWORD currentTime = timeGetTime();
 
 // секция данных игры  
 typedef struct {
@@ -76,6 +77,13 @@ struct {
     bool action = false;//состояние - ожидание (игрок должен нажать пробел) или игра
 } game;
 
+struct enemy_ {
+    sprite enemy_sprite;
+};
+enemy_ enemy;
+
+
+
 struct {
     HWND hWnd;//хэндл окна
     HDC device_context, context;// два контекста устройства (для буферизации)
@@ -116,7 +124,7 @@ void InitGame()
     loc[2].items.push_back(itemLib[(int)itemID::hemlet]);
 
     loc[0].plats.emplace_back(window.width / 1.9, window.height - 200, 60, 600);
-    loc[0].plats.emplace_back(window.width / 6, window.height - 60, 60, 600);
+    //loc[0].plats.emplace_back(window.width / 6, window.height - 60, 60, 600);
     loc[0].plats.emplace_back(window.width / 6, window.height - 350, 60, 600);
     loc[1].plats.emplace_back(0, window.height - 200, 60, 900);
     loc[1].plats.emplace_back(window.width / 1.7, window.height - 200, 60, window.width - window.width / 1.7);
@@ -134,6 +142,15 @@ void InitGame()
     player.hero_sprite.width = 100;
     player.hero_sprite.height = 100;
     player.hero_sprite.hBitmap = Show("hero_right.bmp");
+    player.hero_sprite.speed = 25;
+
+    enemy.enemy_sprite.x = 1500;
+    enemy.enemy_sprite.y = window.height - 100;
+    enemy.enemy_sprite.width = 100;
+    enemy.enemy_sprite.height = 100;
+    enemy.enemy_sprite.hBitmap = Show("hero_right.bmp");
+    enemy.enemy_sprite.speed = 15;
+
 }
 
 void ShowScore()
@@ -181,8 +198,95 @@ void ShowBitmap(HDC hDC, int x, int y, int x1, int y1, HBITMAP hBitmapBall, bool
     DeleteDC(hMemDC); // Удаляем контекст памяти
 }
 
+
+
+
+
+    //if ()
+    //    
+    //    ((pl_s.y + pl_s.height >= platform.y &&
+    //    pl_s.y <= platform.y) &&
+    //    (pl_s.x + pl_s.width >= platform.x && //над платформой
+    //        pl_s.x <= platform.x + platform.width)) {
+
+    //    player.hero_sprite.y = loc[player.current_location].plats[i].pl_sprite.y 
+    //        - player.hero_sprite.height;
+    //    gravity = 0;
+    //}
+    //else if (pl_s.y <= platform.y + platform.height && //под платформой
+    //    pl_s.y + pl_s.height >= platform.y + platform.height &&
+    //    pl_s.x + pl_s.width >= platform.x &&
+    //    pl_s.x <= platform.x + platform.width) {
+
+    //    player.hero_sprite.y = loc[player.current_location].plats[i].pl_sprite.y 
+    //        + loc[player.current_location].plats[i].pl_sprite.height;
+    //}
+    //else {
+    //    gravity = 15;
+    //}
 int gravity = 15;
 int jump = 0;
+bool isJumping = false;
+
+void ProcessInput()
+{
+    if (GetAsyncKeyState('A')) {
+        player.hero_sprite.hBitmap = Show("hero_left.bmp");
+        player.hero_sprite.x -= player.hero_sprite.speed;
+    }
+    if (GetAsyncKeyState('D')) {
+        player.hero_sprite.hBitmap = Show("hero_right.bmp");
+        player.hero_sprite.x += player.hero_sprite.speed;
+    }
+    auto pl_s = player.hero_sprite;
+
+        //bool isOnGround = ;
+        /*bool isOnPlatform = (pl_s.y + pl_s.height == platform.y);*/
+
+        if ( GetAsyncKeyState('W') && !isJumping) {
+            jump = 70;
+            isJumping = true;
+        }
+        //else if (pl_s.y == window.height - pl_s.height) {
+        //    isJumping = false;
+        //    //Sleep(150);
+        //}
+        if ((pl_s.y == window.height - pl_s.height)) {
+            isJumping = false;
+        }
+    
+        player.hero_sprite.y += gravity - jump;
+        player.hero_sprite.y = min(window.height - player.hero_sprite.height, player.hero_sprite.y);
+        jump *= 0.8;
+}
+
+void EnemyMove() {
+    DWORD a = currentTime;
+    //time_t mytime;
+    //time(&mytime);
+    //int i = 2;
+    //while (i != 3) {
+    
+    if (a >= currentTime + 1000) {
+        enemy.enemy_sprite.x += enemy.enemy_sprite.speed;
+    }
+    /*int h = currentTime;
+    if (currentTime <= h + 2000) {
+        enemy.enemy_sprite.x -= enemy.enemy_sprite.speed;
+    }*/
+        //while ((enemy.enemy_sprite.x != 2000) /*&& (i == 2)*/) {
+        //    enemy.enemy_sprite.x += enemy.enemy_sprite.speed;
+        //    //i = 1;
+        //    break;
+        //    
+        //}
+        //while ((enemy.enemy_sprite.x != 1500)/* && (i == 1)*/ ) {
+        //    enemy.enemy_sprite.x -= enemy.enemy_sprite.speed;
+        //    //i = 2;
+        //    break;
+        //}
+    //}
+}
 
 void Collusion()
 {
@@ -219,11 +323,12 @@ void Collusion()
             }
             else {
 
-                if (UP < DOWN) 
+                if (UP < DOWN)
                 {
                     player.hero_sprite.y = platform.y - player.hero_sprite.height;
+                    isJumping = false;
                 }
-                else 
+                else
                 {
                     player.hero_sprite.y = platform.y + platform.height;
                 }
@@ -234,61 +339,6 @@ void Collusion()
 
 
 
-    //if ()
-    //    
-    //    ((pl_s.y + pl_s.height >= platform.y &&
-    //    pl_s.y <= platform.y) &&
-    //    (pl_s.x + pl_s.width >= platform.x && //над платформой
-    //        pl_s.x <= platform.x + platform.width)) {
-
-    //    player.hero_sprite.y = loc[player.current_location].plats[i].pl_sprite.y 
-    //        - player.hero_sprite.height;
-    //    gravity = 0;
-    //}
-    //else if (pl_s.y <= platform.y + platform.height && //под платформой
-    //    pl_s.y + pl_s.height >= platform.y + platform.height &&
-    //    pl_s.x + pl_s.width >= platform.x &&
-    //    pl_s.x <= platform.x + platform.width) {
-
-    //    player.hero_sprite.y = loc[player.current_location].plats[i].pl_sprite.y 
-    //        + loc[player.current_location].plats[i].pl_sprite.height;
-    //}
-    //else {
-    //    gravity = 15;
-    //}
-
-
-void ProcessInput()
-{
-    if (GetAsyncKeyState('A')) {
-        player.hero_sprite.hBitmap = Show("hero_left.bmp");
-        player.hero_sprite.x -= 25;
-    }
-    if (GetAsyncKeyState('D')) {
-        player.hero_sprite.hBitmap = Show("hero_right.bmp");
-        player.hero_sprite.x += 25;
-    }
-    auto pl_s = player.hero_sprite;
-
-    for (int i = 0; i < loc[player.current_location].plats.size(); i++)
-    {
-        auto platform = loc[player.current_location].plats[i].pl_sprite;
-
-        bool isOnGround = (pl_s.y == window.height - pl_s.height);
-        bool isOnPlatform = (pl_s.y + pl_s.height == platform.y);
-
-        if (!isJumping && GetAsyncKeyState('W')) {
-            jump = 70;
-            isJumping = true;
-        }
-        if ((isOnGround) || (isOnPlatform)) {
-            isJumping = false;
-        }
-    }
-        player.hero_sprite.y += gravity - jump;
-        player.hero_sprite.y = min(window.height - player.hero_sprite.height, player.hero_sprite.y);
-        jump *= 0.8;
-}
 
 void ShowSprites()
 {
@@ -319,6 +369,7 @@ void ShowSprites()
         auto platform = loc[player.current_location].plats[i].pl_sprite;
         ShowBitmap(window.context, platform.x, platform.y, platform.width, platform.height, platform.hBitmap);//платформы
     }
+    ShowBitmap(window.context, enemy.enemy_sprite.x, enemy.enemy_sprite.y, enemy.enemy_sprite.width, enemy.enemy_sprite.height, enemy.enemy_sprite.hBitmap);
 }
 
 void LimitHero()
@@ -364,12 +415,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     while (!GetAsyncKeyState(VK_ESCAPE))
     {
         ShowSprites();//рисуем фон, героя, предметы и платформы
+        ProcessInput();//опрос клавиатуры
+        EnemyMove();
         ShowScore();//рисуем очик и жизни
         BitBlt(window.device_context, 0, 0, window.width, window.height, window.context, 0, 0, SRCCOPY);//копируем буфер в окно
-        Sleep(13);//ждем 16 милисекунд (1/количество кадров в секунду)
+        Sleep(16);//ждем 16 милисекунд (1/количество кадров в секунду)
 
         Collusion();//коллизия
-        ProcessInput();//опрос клавиатуры
         LimitHero();//проверяем, чтобы ракетка не убежала за экран
     }
 
