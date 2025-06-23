@@ -80,16 +80,23 @@ struct {
 struct enemy_ {
     sprite enemy_sprite;
     int life = 5;
-    float EnemyPos = enemy_sprite.x;
     int currentloc = 0;
-    int startloc;
-    int endloc;
-    float progress;
-    bool isMoving;
+    
 
 };
 enemy_ enemy;
 
+struct enemyWalck 
+{
+    float startPos;
+    float endPos;
+    float speed;
+    float progress;
+    
+
+};
+
+enemyWalck Walck;
 
 
 struct {
@@ -161,11 +168,11 @@ void InitGame()
     enemy.enemy_sprite.height = 100;
     enemy.enemy_sprite.hBitmap = Show("hero_right.bmp");
 
-    enemy.startloc = enemy.enemy_sprite.x;
-    enemy.endloc = window.width;
-    enemy.enemy_sprite.speed = .05f;
-    enemy.progress = 0;
-    enemy.isMoving = true;
+    Walck.startPos = enemy.enemy_sprite.x;
+    Walck.endPos = window.width;
+    Walck.speed = 5.;
+    Walck.progress = 0;
+    
 
 }
 
@@ -246,60 +253,26 @@ void ProcessInput()
 }
 
 void EnemyMove() {
-    float steps = 0;
-    DWORD a = currentTime;
-    time_t mytime;
-    time(&mytime);
+    if (enemy.currentloc != player.current_location) return;
 
-    if (!enemy.isMoving) return;
-    
-        enemy.progress += enemy.enemy_sprite.speed;
+   bool Moving = true;
 
-        steps = 1. / enemy.enemy_sprite.speed;
-        float Posx = 0.008 * (enemy.endloc - enemy.startloc) / steps;
-
-        for (auto& Enemy : enemy.enemy_sprite.x) 
-        {
-            Enemy += Posx;
+    if (Moving) {
+        enemy.enemy_sprite.x += Walck.speed;
+       
+        if (enemy.enemy_sprite.x >= Walck.endPos) {
+            Moving = false;
+            enemy.enemy_sprite.hBitmap = Show("hero_left.bmp");
         }
-    
-
-    if (enemy.progress>= 1.)
-    {
-        enemy.isMoving = false;
     }
-
-    
-
-
-
-
-
-
-
-
-    //int i = 2;
-    //while (i != 3) {
-    //
-    //if (a >= currentTime + 1000) {
-    //    enemy.enemy_sprite.x += enemy.enemy_sprite.speed;
-    //}
-    ///*int h = currentTime;
-    //if (currentTime <= h + 2000) {
-    //    enemy.enemy_sprite.x -= enemy.enemy_sprite.speed;
-    //}*/
-    //    while ((enemy.enemy_sprite.x != 2000) /*&& (i == 2)*/) {
-    //        enemy.enemy_sprite.x += enemy.enemy_sprite.speed;
-    //        i = 1;
-    //        break;
-    //        
-    //    }
-    //    while ((enemy.enemy_sprite.x != 1500)/* && (i == 1)*/ ) {
-    //        enemy.enemy_sprite.x -= enemy.enemy_sprite.speed;
-    //        i = 2;
-    //        break;
-    //    }
-    //}
+    else {
+        enemy.enemy_sprite.x -= Walck.speed;
+       
+        if (enemy.enemy_sprite.x <= Walck.startPos) {
+            Moving = true;
+            enemy.enemy_sprite.hBitmap = Show("hero_right.bmp"); 
+        }
+    }
 }
 
 void Collusion()
