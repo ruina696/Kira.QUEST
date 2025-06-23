@@ -79,6 +79,14 @@ struct {
 
 struct enemy_ {
     sprite enemy_sprite;
+    int life = 5;
+    float EnemyPos = enemy_sprite.x;
+    int currentloc = 0;
+    int startloc;
+    int endloc;
+    float progress;
+    bool isMoving;
+
 };
 enemy_ enemy;
 
@@ -144,12 +152,20 @@ void InitGame()
     player.hero_sprite.hBitmap = Show("hero_right.bmp");
     player.hero_sprite.speed = 25;
 
+    enemy.currentloc = 0;
+    
+    
     enemy.enemy_sprite.x = 1500;
     enemy.enemy_sprite.y = window.height - 100;
     enemy.enemy_sprite.width = 100;
     enemy.enemy_sprite.height = 100;
     enemy.enemy_sprite.hBitmap = Show("hero_right.bmp");
-    enemy.enemy_sprite.speed = 15;
+
+    enemy.startloc = enemy.enemy_sprite.x;
+    enemy.endloc = window.width;
+    enemy.enemy_sprite.speed = .05f;
+    enemy.progress = 0;
+    enemy.isMoving = true;
 
 }
 
@@ -198,32 +214,6 @@ void ShowBitmap(HDC hDC, int x, int y, int x1, int y1, HBITMAP hBitmapBall, bool
     DeleteDC(hMemDC); // Удаляем контекст памяти
 }
 
-
-
-
-
-    //if ()
-    //    
-    //    ((pl_s.y + pl_s.height >= platform.y &&
-    //    pl_s.y <= platform.y) &&
-    //    (pl_s.x + pl_s.width >= platform.x && //над платформой
-    //        pl_s.x <= platform.x + platform.width)) {
-
-    //    player.hero_sprite.y = loc[player.current_location].plats[i].pl_sprite.y 
-    //        - player.hero_sprite.height;
-    //    gravity = 0;
-    //}
-    //else if (pl_s.y <= platform.y + platform.height && //под платформой
-    //    pl_s.y + pl_s.height >= platform.y + platform.height &&
-    //    pl_s.x + pl_s.width >= platform.x &&
-    //    pl_s.x <= platform.x + platform.width) {
-
-    //    player.hero_sprite.y = loc[player.current_location].plats[i].pl_sprite.y 
-    //        + loc[player.current_location].plats[i].pl_sprite.height;
-    //}
-    //else {
-    //    gravity = 15;
-    //}
 int gravity = 15;
 int jump = 0;
 bool isJumping = false;
@@ -240,17 +230,12 @@ void ProcessInput()
     }
     auto pl_s = player.hero_sprite;
 
-        //bool isOnGround = ;
-        /*bool isOnPlatform = (pl_s.y + pl_s.height == platform.y);*/
-
+        
         if ( GetAsyncKeyState('W') && !isJumping) {
             jump = 70;
             isJumping = true;
         }
-        //else if (pl_s.y == window.height - pl_s.height) {
-        //    isJumping = false;
-        //    //Sleep(150);
-        //}
+        
         if ((pl_s.y == window.height - pl_s.height)) {
             isJumping = false;
         }
@@ -261,30 +246,59 @@ void ProcessInput()
 }
 
 void EnemyMove() {
+    float steps = 0;
     DWORD a = currentTime;
-    //time_t mytime;
-    //time(&mytime);
+    time_t mytime;
+    time(&mytime);
+
+    if (!enemy.isMoving) return;
+    
+        enemy.progress += enemy.enemy_sprite.speed;
+
+        steps = 1. / enemy.enemy_sprite.speed;
+        float Posx = 0.008 * (enemy.endloc - enemy.startloc) / steps;
+
+        for (auto& Enemy : enemy.enemy_sprite.x) 
+        {
+            Enemy += Posx;
+        }
+    
+
+    if (enemy.progress>= 1.)
+    {
+        enemy.isMoving = false;
+    }
+
+    
+
+
+
+
+
+
+
+
     //int i = 2;
     //while (i != 3) {
-    
-    if (a >= currentTime + 1000) {
-        enemy.enemy_sprite.x += enemy.enemy_sprite.speed;
-    }
-    /*int h = currentTime;
-    if (currentTime <= h + 2000) {
-        enemy.enemy_sprite.x -= enemy.enemy_sprite.speed;
-    }*/
-        //while ((enemy.enemy_sprite.x != 2000) /*&& (i == 2)*/) {
-        //    enemy.enemy_sprite.x += enemy.enemy_sprite.speed;
-        //    //i = 1;
-        //    break;
-        //    
-        //}
-        //while ((enemy.enemy_sprite.x != 1500)/* && (i == 1)*/ ) {
-        //    enemy.enemy_sprite.x -= enemy.enemy_sprite.speed;
-        //    //i = 2;
-        //    break;
-        //}
+    //
+    //if (a >= currentTime + 1000) {
+    //    enemy.enemy_sprite.x += enemy.enemy_sprite.speed;
+    //}
+    ///*int h = currentTime;
+    //if (currentTime <= h + 2000) {
+    //    enemy.enemy_sprite.x -= enemy.enemy_sprite.speed;
+    //}*/
+    //    while ((enemy.enemy_sprite.x != 2000) /*&& (i == 2)*/) {
+    //        enemy.enemy_sprite.x += enemy.enemy_sprite.speed;
+    //        i = 1;
+    //        break;
+    //        
+    //    }
+    //    while ((enemy.enemy_sprite.x != 1500)/* && (i == 1)*/ ) {
+    //        enemy.enemy_sprite.x -= enemy.enemy_sprite.speed;
+    //        i = 2;
+    //        break;
+    //    }
     //}
 }
 
