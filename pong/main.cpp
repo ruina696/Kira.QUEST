@@ -1,4 +1,4 @@
-//linker::system::subsystem  - Windows(/ SUBSYSTEM:WINDOWS)
+п»ї//linker::system::subsystem  - Windows(/ SUBSYSTEM:WINDOWS)
 //configuration::advanced::character set - not set
 //linker::input::additional dependensies Msimg32.lib; Winmm.lib
 
@@ -13,10 +13,10 @@ using namespace std;
 
 DWORD currentTime = timeGetTime();
 
-// секция данных игры  
+// СЃРµРєС†РёСЏ РґР°РЅРЅС‹С… РёРіСЂС‹  
 typedef struct {
     float x, y, width, height, rad, dx, dy, speed;
-    HBITMAP hBitmap;//хэндл к спрайту шарика 
+    HBITMAP hBitmap;//С…СЌРЅРґР» Рє СЃРїСЂР°Р№С‚Сѓ С€Р°СЂРёРєР° 
 } sprite;
 
 enum class itemID {
@@ -62,52 +62,87 @@ public:
     }
 };
 
+class Enemy {
+public:
+    int life = 5;
+    float startPos;
+    float endPos;
+    sprite en_sprite;
+
+    Enemy( int en_x, int en_y, int EndPos ) {
+
+        en_sprite.x = en_x;
+        en_sprite.y = en_y;
+        startPos = en_x;
+        endPos = EndPos;
+        en_sprite.speed = 3;
+        en_sprite.height = 100;
+        en_sprite.width = 100;
+        en_sprite.hBitmap = Show("enemy_right.bmp");
+    }
+
+    void EnemyMove();
+
+};
+
+//struct enemy_ {
+//    sprite enemy_sprite;
+//    int life = 5;
+//    int currentloc = 0;
+//    
+//
+//};
+//enemy_ enemy;
+
 struct location_ {
     HBITMAP hBitmap;
     int left_portal;
     int right_portal;
     vector<Platform> plats;
     vector <item_> items;
+    vector <Enemy> enemies;
 };
 
 location_ loc[5];
 
 struct {
-    int score, balls;//количество набранных очков и оставшихся "жизней"
-    bool action = false;//состояние - ожидание (игрок должен нажать пробел) или игра
+    int score, balls;//РєРѕР»РёС‡РµСЃС‚РІРѕ РЅР°Р±СЂР°РЅРЅС‹С… РѕС‡РєРѕРІ Рё РѕСЃС‚Р°РІС€РёС…СЃСЏ "Р¶РёР·РЅРµР№"
+    bool action = false;//СЃРѕСЃС‚РѕСЏРЅРёРµ - РѕР¶РёРґР°РЅРёРµ (РёРіСЂРѕРє РґРѕР»Р¶РµРЅ РЅР°Р¶Р°С‚СЊ РїСЂРѕР±РµР») РёР»Рё РёРіСЂР°
 } game;
 
-struct enemy_ {
-    sprite enemy_sprite;
-    int life = 5;
-    int currentloc = 0;
-    
 
-};
-enemy_ enemy;
-
-struct enemyWalck 
-{
-    float startPos;
-    float endPos;
-    float speed;
-    float progress;
-    
-
-};
-
-enemyWalck Walck;
+//struct enemyWalck 
+//{
+//    float startPos;
+//    float endPos;
+//    float speed;
+//    //float progress;
+//    
+//
+//};
+//
+//enemyWalck Walck;
 
 
 struct {
-    HWND hWnd;//хэндл окна
-    HDC device_context, context;// два контекста устройства (для буферизации)
-    int width, height;//сюда сохраним размеры окна которое создаст программа
+    HWND hWnd;//С…СЌРЅРґР» РѕРєРЅР°
+    HDC device_context, context;// РґРІР° РєРѕРЅС‚РµРєСЃС‚Р° СѓСЃС‚СЂРѕР№СЃС‚РІР° (РґР»СЏ Р±СѓС„РµСЂРёР·Р°С†РёРё)
+    int width, height;//СЃСЋРґР° СЃРѕС…СЂР°РЅРёРј СЂР°Р·РјРµСЂС‹ РѕРєРЅР° РєРѕС‚РѕСЂРѕРµ СЃРѕР·РґР°СЃС‚ РїСЂРѕРіСЂР°РјРјР°
 } window;
 
-HBITMAP hBack;// хэндл для фонового изображения
+HBITMAP hBack;// С…СЌРЅРґР» РґР»СЏ С„РѕРЅРѕРІРѕРіРѕ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
 
-//cекция кода
+//cРµРєС†РёСЏ РєРѕРґР°
+
+//void EnemyInfo(string name, int x, int y, LPCSTR en_bmp) 
+//{
+//    enemy_ i;
+//    i.enemy_sprite.x = x;
+//    i.enemy_sprite.y = y;
+//    i.enemy_sprite.height = 100;
+//    i.enemy_sprite.width = 100;
+//    i.enemy_sprite.hBitmap = Show("enemy_left.bmp");
+//}
 
 void ItemInfo(string name, int x, int y, int height, int width, LPCSTR it_name)
 {
@@ -147,6 +182,11 @@ void InitGame()
     loc[2].plats.emplace_back(600, window.height - 200, 60, 200);
     loc[2].plats.emplace_back(1200, window.height - 200, 60, 200);
 
+    loc[0].enemies.emplace_back(1500, window.height - 100, 2000);
+    loc[0].enemies.emplace_back(1800, window.height - 100, 2100);
+    loc[1].enemies.emplace_back(1800, window.height - 100, 2100);
+    loc[1].enemies.emplace_back(1100, window.height - 100, 2100);
+
     LocInfo(0, "loc0.bmp", 2, 1);
     LocInfo(1, "loc1.bmp", 0, 2);
     LocInfo(2, "loc2.bmp", 1, 0);
@@ -159,34 +199,34 @@ void InitGame()
     player.hero_sprite.hBitmap = Show("hero_right.bmp");
     player.hero_sprite.speed = 25;
 
-    enemy.currentloc = 0;
+    //enemy.currentloc = 0;
     
     
-    enemy.enemy_sprite.x = 1500;
+    /*enemy.enemy_sprite.x = 1500;
     enemy.enemy_sprite.y = window.height - 100;
     enemy.enemy_sprite.width = 100;
     enemy.enemy_sprite.height = 100;
-    enemy.enemy_sprite.hBitmap = Show("hero_right.bmp");
+    enemy.enemy_sprite.hBitmap = Show("enemy_right.bmp");*/
 
-    Walck.startPos = enemy.enemy_sprite.x;
-    Walck.endPos = window.width;
-    Walck.speed = 5.;
-    Walck.progress = 0;
+    /*Walck.startPos = loc[0]enemies.x;
+    Walck.endPos = 2000;
+    Walck.speed = 5.;*/
+    //Walck.progress = 0;
     
 
 }
 
 void ShowScore()
 {
-    //поиграем шрифтами и цветами
+    //РїРѕРёРіСЂР°РµРј С€СЂРёС„С‚Р°РјРё Рё С†РІРµС‚Р°РјРё
     SetTextColor(window.context, RGB(160, 160, 160));
     SetBkColor(window.context, RGB(0, 0, 0));
     SetBkMode(window.context, TRANSPARENT);
     auto hFont = CreateFont(70, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 2, 0, "CALIBRI");
     auto hTmp = (HFONT)SelectObject(window.context, hFont);
 
-    char txt[32];//буфер для текста
-    _itoa_s(player.life, txt, 10);//преобразование числовой переменной в текст. текст окажется в переменной txt
+    char txt[32];//Р±СѓС„РµСЂ РґР»СЏ С‚РµРєСЃС‚Р°
+    _itoa_s(player.life, txt, 10);//РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ С‡РёСЃР»РѕРІРѕР№ РїРµСЂРµРјРµРЅРЅРѕР№ РІ С‚РµРєСЃС‚. С‚РµРєСЃС‚ РѕРєР°Р¶РµС‚СЃСЏ РІ РїРµСЂРµРјРµРЅРЅРѕР№ txt
     TextOutA(window.context, 10, 10, "Health", 6);
     TextOutA(window.context, 200, 10, (LPCSTR)txt, strlen(txt));
     _itoa_s(game.balls, txt, 10);
@@ -199,26 +239,26 @@ void ShowBitmap(HDC hDC, int x, int y, int x1, int y1, HBITMAP hBitmapBall, bool
     HDC hMemDC;
     BITMAP bm;
 
-    hMemDC = CreateCompatibleDC(hDC); // Создаем контекст памяти, совместимый с контекстом отображения
-    hOldbm = (HBITMAP)SelectObject(hMemDC, hBitmapBall);// Выбираем изображение bitmap в контекст памяти
+    hMemDC = CreateCompatibleDC(hDC); // РЎРѕР·РґР°РµРј РєРѕРЅС‚РµРєСЃС‚ РїР°РјСЏС‚Рё, СЃРѕРІРјРµСЃС‚РёРјС‹Р№ СЃ РєРѕРЅС‚РµРєСЃС‚РѕРј РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ
+    hOldbm = (HBITMAP)SelectObject(hMemDC, hBitmapBall);// Р’С‹Р±РёСЂР°РµРј РёР·РѕР±СЂР°Р¶РµРЅРёРµ bitmap РІ РєРѕРЅС‚РµРєСЃС‚ РїР°РјСЏС‚Рё
 
-    if (hOldbm) // Если не было ошибок, продолжаем работу
+    if (hOldbm) // Р•СЃР»Рё РЅРµ Р±С‹Р»Рѕ РѕС€РёР±РѕРє, РїСЂРѕРґРѕР»Р¶Р°РµРј СЂР°Р±РѕС‚Сѓ
     {
-        GetObject(hBitmapBall, sizeof(BITMAP), (LPSTR)&bm); // Определяем размеры изображения
+        GetObject(hBitmapBall, sizeof(BITMAP), (LPSTR)&bm); // РћРїСЂРµРґРµР»СЏРµРј СЂР°Р·РјРµСЂС‹ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
 
         if (alpha)
         {
-            TransparentBlt(window.context, x, y, x1, y1, hMemDC, 0, 0, x1, y1, RGB(0, 0, 0));//все пиксели черного цвета будут интепретированы как прозрачные
+            TransparentBlt(window.context, x, y, x1, y1, hMemDC, 0, 0, x1, y1, RGB(0, 0, 0));//РІСЃРµ РїРёРєСЃРµР»Рё С‡РµСЂРЅРѕРіРѕ С†РІРµС‚Р° Р±СѓРґСѓС‚ РёРЅС‚РµРїСЂРµС‚РёСЂРѕРІР°РЅС‹ РєР°Рє РїСЂРѕР·СЂР°С‡РЅС‹Рµ
         }
         else
         {
-            StretchBlt(hDC, x, y, x1, y1, hMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY); // Рисуем изображение bitmap
+            StretchBlt(hDC, x, y, x1, y1, hMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY); // Р РёСЃСѓРµРј РёР·РѕР±СЂР°Р¶РµРЅРёРµ bitmap
         }
 
-        SelectObject(hMemDC, hOldbm);// Восстанавливаем контекст памяти
+        SelectObject(hMemDC, hOldbm);// Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµРј РєРѕРЅС‚РµРєСЃС‚ РїР°РјСЏС‚Рё
     }
 
-    DeleteDC(hMemDC); // Удаляем контекст памяти
+    DeleteDC(hMemDC); // РЈРґР°Р»СЏРµРј РєРѕРЅС‚РµРєСЃС‚ РїР°РјСЏС‚Рё
 }
 
 int gravity = 15;
@@ -251,28 +291,32 @@ void ProcessInput()
         player.hero_sprite.y = min(window.height - player.hero_sprite.height, player.hero_sprite.y);
         jump *= 0.8;
 }
+bool Moving = true;
 
-void EnemyMove() {
-    if (enemy.currentloc != player.current_location) return;
 
-   bool Moving = true;
+void Enemy::EnemyMove() {
+    
+    
+        for (int i = 0; i < loc[player.current_location].enemies.size(); i++) {
+            auto enemy = loc[player.current_location].enemies[i].en_sprite;
 
-    if (Moving) {
-        enemy.enemy_sprite.x += Walck.speed;
-       
-        if (enemy.enemy_sprite.x >= Walck.endPos) {
-            Moving = false;
-            enemy.enemy_sprite.hBitmap = Show("hero_left.bmp");
+            if (Moving) {
+                loc[player.current_location].enemies[i].en_sprite.x += enemy.speed;
+                loc[player.current_location].enemies[i].en_sprite.hBitmap = Show("enemy_right.bmp");
+
+                if (enemy.x >= loc[player.current_location].enemies[i].endPos) {
+                    Moving = false;
+                }
+            }
+            else {
+                loc[player.current_location].enemies[i].en_sprite.x -= enemy.speed;
+                loc[player.current_location].enemies[i].en_sprite.hBitmap = Show("enemy_left.bmp");
+
+                if (enemy.x <= loc[player.current_location].enemies[i].startPos) {
+                    Moving = true;
+                }
+            }
         }
-    }
-    else {
-        enemy.enemy_sprite.x -= Walck.speed;
-       
-        if (enemy.enemy_sprite.x <= Walck.startPos) {
-            Moving = true;
-            enemy.enemy_sprite.hBitmap = Show("hero_right.bmp"); 
-        }
-    }
 }
 
 void Collusion()
@@ -329,11 +373,11 @@ void Collusion()
 
 void ShowSprites()
 {
-    ShowBitmap(window.context, 0, 0, window.width, window.height, loc[player.current_location].hBitmap);//задний фон
+    ShowBitmap(window.context, 0, 0, window.width, window.height, loc[player.current_location].hBitmap);//Р·Р°РґРЅРёР№ С„РѕРЅ
 
     for (int i = 0; i < loc[player.current_location].items.size(); i++) {
         auto item = loc[player.current_location].items[i].Sprite;
-        ShowBitmap(window.context, item.x, item.y, item.width, item.height, item.hBitmap);//предметы на карте
+        ShowBitmap(window.context, item.x, item.y, item.width, item.height, item.hBitmap);//РїСЂРµРґРјРµС‚С‹ РЅР° РєР°СЂС‚Рµ
 
         if (player.hero_sprite.x + player.hero_sprite.width >= item.x && player.hero_sprite.x <= item.x + item.width &&
             player.hero_sprite.y + player.hero_sprite.height >= item.y) {
@@ -345,18 +389,22 @@ void ShowSprites()
 
     if (!player.player_items.empty()) {
         for (int i = 0; i < player.player_items.size(); i++) {
-            ShowBitmap(window.context, 200 + i * 120, 100, player.player_items[i].Sprite.width, player.player_items[i].Sprite.height, player.player_items[i].Sprite.hBitmap);//предметы в инвентаре
+            ShowBitmap(window.context, 200 + i * 120, 100, player.player_items[i].Sprite.width, player.player_items[i].Sprite.height, player.player_items[i].Sprite.hBitmap);//РїСЂРµРґРјРµС‚С‹ РІ РёРЅРІРµРЅС‚Р°СЂРµ
         }
     }
 
-    ShowBitmap(window.context, player.hero_sprite.x, player.hero_sprite.y, player.hero_sprite.width, player.hero_sprite.height, player.hero_sprite.hBitmap);// ракетка игрока
+    ShowBitmap(window.context, player.hero_sprite.x, player.hero_sprite.y, player.hero_sprite.width, player.hero_sprite.height, player.hero_sprite.hBitmap);// СЂР°РєРµС‚РєР° РёРіСЂРѕРєР°
 
     for (int i = 0; i < loc[player.current_location].plats.size(); i++)
     {
         auto platform = loc[player.current_location].plats[i].pl_sprite;
-        ShowBitmap(window.context, platform.x, platform.y, platform.width, platform.height, platform.hBitmap);//платформы
+        ShowBitmap(window.context, platform.x, platform.y, platform.width, platform.height, platform.hBitmap);//РїР»Р°С‚С„РѕСЂРјС‹
     }
-    ShowBitmap(window.context, enemy.enemy_sprite.x, enemy.enemy_sprite.y, enemy.enemy_sprite.width, enemy.enemy_sprite.height, enemy.enemy_sprite.hBitmap);
+    for (int i = 0; i < loc[player.current_location].enemies.size(); i++) {
+        auto enemy = loc[player.current_location].enemies[i].en_sprite;
+        ShowBitmap(window.context, enemy.x, enemy.y, enemy.width, enemy.height, enemy.hBitmap);
+    }
+    //ShowBitmap(window.context, enemy.enemy_sprite.x, enemy.enemy_sprite.y, enemy.enemy_sprite.width, enemy.enemy_sprite.height, enemy.enemy_sprite.hBitmap);
 }
 
 void LimitHero()
@@ -378,11 +426,11 @@ void InitWindow()
 
     RECT r;
     GetClientRect(window.hWnd, &r);
-    window.device_context = GetDC(window.hWnd);//из хэндла окна достаем хэндл контекста устройства для рисования
-    window.width = r.right - r.left;//определяем размеры и сохраняем
+    window.device_context = GetDC(window.hWnd);//РёР· С…СЌРЅРґР»Р° РѕРєРЅР° РґРѕСЃС‚Р°РµРј С…СЌРЅРґР» РєРѕРЅС‚РµРєСЃС‚Р° СѓСЃС‚СЂРѕР№СЃС‚РІР° РґР»СЏ СЂРёСЃРѕРІР°РЅРёСЏ
+    window.width = r.right - r.left;//РѕРїСЂРµРґРµР»СЏРµРј СЂР°Р·РјРµСЂС‹ Рё СЃРѕС…СЂР°РЅСЏРµРј
     window.height = r.bottom - r.top;
-    window.context = CreateCompatibleDC(window.device_context);//второй буфер
-    SelectObject(window.context, CreateCompatibleBitmap(window.device_context, window.width, window.height));//привязываем окно к контексту
+    window.context = CreateCompatibleDC(window.device_context);//РІС‚РѕСЂРѕР№ Р±СѓС„РµСЂ
+    SelectObject(window.context, CreateCompatibleBitmap(window.device_context, window.width, window.height));//РїСЂРёРІСЏР·С‹РІР°РµРј РѕРєРЅРѕ Рє РєРѕРЅС‚РµРєСЃС‚Сѓ
     GetClientRect(window.hWnd, &r);
 
 }
@@ -393,23 +441,26 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     _In_ int       nCmdShow)
 {
     
-    InitWindow();//здесь инициализируем все что нужно для рисования в окне
-    InitGame();//здесь инициализируем переменные игры
+    InitWindow();//Р·РґРµСЃСЊ РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РІСЃРµ С‡С‚Рѕ РЅСѓР¶РЅРѕ РґР»СЏ СЂРёСЃРѕРІР°РЅРёСЏ РІ РѕРєРЅРµ
+    InitGame();//Р·РґРµСЃСЊ РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РїРµСЂРµРјРµРЅРЅС‹Рµ РёРіСЂС‹
 
     //mciSendString(TEXT("play ..\\Debug\\music.mp3 repeat"), NULL, 0, NULL);
     ShowCursor(NULL);
     
     while (!GetAsyncKeyState(VK_ESCAPE))
     {
-        ShowSprites();//рисуем фон, героя, предметы и платформы
-        ProcessInput();//опрос клавиатуры
-        EnemyMove();
-        ShowScore();//рисуем очик и жизни
-        BitBlt(window.device_context, 0, 0, window.width, window.height, window.context, 0, 0, SRCCOPY);//копируем буфер в окно
-        Sleep(16);//ждем 16 милисекунд (1/количество кадров в секунду)
+        ShowSprites();//СЂРёСЃСѓРµРј С„РѕРЅ, РіРµСЂРѕСЏ, РїСЂРµРґРјРµС‚С‹ Рё РїР»Р°С‚С„РѕСЂРјС‹
+        ProcessInput();//РѕРїСЂРѕСЃ РєР»Р°РІРёР°С‚СѓСЂС‹
+        for (auto p : loc[player.current_location].enemies) {
+            p.EnemyMove();
 
-        Collusion();//коллизия
-        LimitHero();//проверяем, чтобы ракетка не убежала за экран
+        }
+        ShowScore();//СЂРёСЃСѓРµРј РѕС‡РёРє Рё Р¶РёР·РЅРё
+        BitBlt(window.device_context, 0, 0, window.width, window.height, window.context, 0, 0, SRCCOPY);//РєРѕРїРёСЂСѓРµРј Р±СѓС„РµСЂ РІ РѕРєРЅРѕ
+        Sleep(16);//Р¶РґРµРј 16 РјРёР»РёСЃРµРєСѓРЅРґ (1/РєРѕР»РёС‡РµСЃС‚РІРѕ РєР°РґСЂРѕРІ РІ СЃРµРєСѓРЅРґСѓ)
+
+        Collusion();//РєРѕР»Р»РёР·РёСЏ
+        LimitHero();//РїСЂРѕРІРµСЂСЏРµРј, С‡С‚РѕР±С‹ СЂР°РєРµС‚РєР° РЅРµ СѓР±РµР¶Р°Р»Р° Р·Р° СЌРєСЂР°РЅ
     }
 
 }

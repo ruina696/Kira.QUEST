@@ -50,6 +50,12 @@
     <Image Include="..\Debug\sword.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="..\Debug\enemy_right.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\Debug\enemy_left.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Media Include="..\Debug\bounce.wav">
