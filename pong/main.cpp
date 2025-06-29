@@ -67,15 +67,16 @@ public:
     int life = 5;
     float startPos;
     float endPos;
+    bool Moving;
     sprite en_sprite;
 
-    Enemy( int en_x, int en_y, int EndPos ) {
+    Enemy( int en_x, int en_y, int EndPos, int sp ) {
 
         en_sprite.x = en_x;
         en_sprite.y = en_y;
         startPos = en_x;
         endPos = EndPos;
-        en_sprite.speed = 3;
+        en_sprite.speed = sp;
         en_sprite.height = 100;
         en_sprite.width = 100;
         en_sprite.hBitmap = Show("enemy_right.bmp");
@@ -85,14 +86,6 @@ public:
 
 };
 
-//struct enemy_ {
-//    sprite enemy_sprite;
-//    int life = 5;
-//    int currentloc = 0;
-//    
-//
-//};
-//enemy_ enemy;
 
 struct location_ {
     HBITMAP hBitmap;
@@ -111,19 +104,6 @@ struct {
 } game;
 
 
-//struct enemyWalck 
-//{
-//    float startPos;
-//    float endPos;
-//    float speed;
-//    //float progress;
-//    
-//
-//};
-//
-//enemyWalck Walck;
-
-
 struct {
     HWND hWnd;//хэндл окна
     HDC device_context, context;// два контекста устройства (для буферизации)
@@ -134,15 +114,6 @@ HBITMAP hBack;// хэндл для фонового изображения
 
 //cекция кода
 
-//void EnemyInfo(string name, int x, int y, LPCSTR en_bmp) 
-//{
-//    enemy_ i;
-//    i.enemy_sprite.x = x;
-//    i.enemy_sprite.y = y;
-//    i.enemy_sprite.height = 100;
-//    i.enemy_sprite.width = 100;
-//    i.enemy_sprite.hBitmap = Show("enemy_left.bmp");
-//}
 
 void ItemInfo(string name, int x, int y, int height, int width, LPCSTR it_name)
 {
@@ -182,10 +153,10 @@ void InitGame()
     loc[2].plats.emplace_back(600, window.height - 200, 60, 200);
     loc[2].plats.emplace_back(1200, window.height - 200, 60, 200);
 
-    loc[0].enemies.emplace_back(1500, window.height - 100, 2000);
-    loc[0].enemies.emplace_back(1800, window.height - 100, 2100);
-    loc[1].enemies.emplace_back(1800, window.height - 100, 2100);
-    loc[1].enemies.emplace_back(1100, window.height - 100, 2100);
+    loc[0].enemies.emplace_back(1500, window.height - 100, 2000, 3);
+    loc[0].enemies.emplace_back(1800, window.height - 100, 2100, 10);
+    loc[1].enemies.emplace_back(1800, window.height - 100, 2100, 10);
+    loc[1].enemies.emplace_back(1100, window.height - 100, 2100, 3);
 
     LocInfo(0, "loc0.bmp", 2, 1);
     LocInfo(1, "loc1.bmp", 0, 2);
@@ -199,21 +170,7 @@ void InitGame()
     player.hero_sprite.hBitmap = Show("hero_right.bmp");
     player.hero_sprite.speed = 25;
 
-    //enemy.currentloc = 0;
     
-    
-    /*enemy.enemy_sprite.x = 1500;
-    enemy.enemy_sprite.y = window.height - 100;
-    enemy.enemy_sprite.width = 100;
-    enemy.enemy_sprite.height = 100;
-    enemy.enemy_sprite.hBitmap = Show("enemy_right.bmp");*/
-
-    /*Walck.startPos = loc[0]enemies.x;
-    Walck.endPos = 2000;
-    Walck.speed = 5.;*/
-    //Walck.progress = 0;
-    
-
 }
 
 void ShowScore()
@@ -291,33 +248,32 @@ void ProcessInput()
         player.hero_sprite.y = min(window.height - player.hero_sprite.height, player.hero_sprite.y);
         jump *= 0.8;
 }
-bool Moving = true;
+
 
 
 void Enemy::EnemyMove() {
-    
-    
-        for (int i = 0; i < loc[player.current_location].enemies.size(); i++) {
-            auto enemy = loc[player.current_location].enemies[i].en_sprite;
+    for (int i = 0; i < loc[player.current_location].enemies.size(); i++) {
+        auto& enemy = loc[player.current_location].enemies[i];
 
-            if (Moving) {
-                loc[player.current_location].enemies[i].en_sprite.x += enemy.speed;
-                loc[player.current_location].enemies[i].en_sprite.hBitmap = Show("enemy_right.bmp");
+        if (enemy.Moving) {
+            enemy.en_sprite.x += enemy.en_sprite.speed;
+            enemy.en_sprite.hBitmap = Show("enemy_right.bmp");
 
-                if (enemy.x >= loc[player.current_location].enemies[i].endPos) {
-                    Moving = false;
-                }
-            }
-            else {
-                loc[player.current_location].enemies[i].en_sprite.x -= enemy.speed;
-                loc[player.current_location].enemies[i].en_sprite.hBitmap = Show("enemy_left.bmp");
-
-                if (enemy.x <= loc[player.current_location].enemies[i].startPos) {
-                    Moving = true;
-                }
+            if (enemy.en_sprite.x >= enemy.endPos) {
+                enemy.Moving = false;  
             }
         }
+        else {
+            enemy.en_sprite.x -= enemy.en_sprite.speed;
+            enemy.en_sprite.hBitmap = Show("enemy_left.bmp");
+
+            if (enemy.en_sprite.x <= enemy.startPos) {
+                enemy.Moving = true; 
+            }
+        }
+    }
 }
+
 
 void Collusion()
 {
@@ -451,15 +407,16 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     {
         ShowSprites();//рисуем фон, героя, предметы и платформы
         ProcessInput();//опрос клавиатуры
-        for (auto p : loc[player.current_location].enemies) {
-            p.EnemyMove();
-
-        }
+        
         ShowScore();//рисуем очик и жизни
         BitBlt(window.device_context, 0, 0, window.width, window.height, window.context, 0, 0, SRCCOPY);//копируем буфер в окно
         Sleep(16);//ждем 16 милисекунд (1/количество кадров в секунду)
 
         Collusion();//коллизия
+        for (auto p : loc[player.current_location].enemies) {
+            p.EnemyMove();
+
+        }
         LimitHero();//проверяем, чтобы ракетка не убежала за экран
     }
 
