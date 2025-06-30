@@ -45,6 +45,7 @@ struct platform_ {
 
 auto Show(LPCSTR name) {
     return (HBITMAP)LoadImageA(NULL, name, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    DeleteObject((HBITMAP)LoadImageA(NULL, name, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE));
 }
 
 class Platform
@@ -82,7 +83,14 @@ public:
         en_sprite.hBitmap = Show("enemy_right.bmp");
     }
 
+    ~Enemy() {
+        DeleteObject(en_sprite.hBitmap);
+    }
+
     void EnemyMove() {
+        if (en_sprite.hBitmap) {
+            DeleteObject(en_sprite.hBitmap);
+        }
 
         if (Moving) {
             en_sprite.x += en_sprite.speed;
@@ -352,35 +360,35 @@ void ShowSprites()
 {
     ShowBitmap(window.context, 0, 0, window.width, window.height, loc[player.current_location].hBitmap);//задний фон
 
-    //for (int i = 0; i < loc[player.current_location].items.size(); i++) {
-    //    auto item = loc[player.current_location].items[i].Sprite;
-    //    ShowBitmap(window.context, item.x, item.y, item.width, item.height, item.hBitmap);//предметы на карте
+    for (int i = 0; i < loc[player.current_location].items.size(); i++) {
+        auto item = loc[player.current_location].items[i].Sprite;
+        ShowBitmap(window.context, item.x, item.y, item.width, item.height, item.hBitmap);//предметы на карте
 
-    //    if (player.hero_sprite.x + player.hero_sprite.width >= item.x && player.hero_sprite.x <= item.x + item.width &&
-    //        player.hero_sprite.y + player.hero_sprite.height >= item.y) {
+        if (player.hero_sprite.x + player.hero_sprite.width >= item.x && player.hero_sprite.x <= item.x + item.width &&
+            player.hero_sprite.y + player.hero_sprite.height >= item.y) {
 
-    //        player.player_items.push_back(loc[player.current_location].items[i]);
-    //        loc[player.current_location].items.erase(loc[player.current_location].items.begin() + i);
-    //    }
-    //}
+            player.player_items.push_back(loc[player.current_location].items[i]);
+            loc[player.current_location].items.erase(loc[player.current_location].items.begin() + i);
+        }
+    }
 
-    //if (!player.player_items.empty()) {
-    //    for (int i = 0; i < player.player_items.size(); i++) {
-    //        ShowBitmap(window.context, 200 + i * 120, 100, player.player_items[i].Sprite.width, player.player_items[i].Sprite.height, player.player_items[i].Sprite.hBitmap);//предметы в инвентаре
-    //    }
-    //}
+    if (!player.player_items.empty()) {
+        for (int i = 0; i < player.player_items.size(); i++) {
+            ShowBitmap(window.context, 200 + i * 120, 100, player.player_items[i].Sprite.width, player.player_items[i].Sprite.height, player.player_items[i].Sprite.hBitmap);//предметы в инвентаре
+        }
+    }
 
     ShowBitmap(window.context, player.hero_sprite.x, player.hero_sprite.y, player.hero_sprite.width, player.hero_sprite.height, player.hero_sprite.hBitmap);// ракетка игрока
 
-    //for (int i = 0; i < loc[player.current_location].plats.size(); i++)
-    //{
-    //    auto platform = loc[player.current_location].plats[i].pl_sprite;
-    //    ShowBitmap(window.context, platform.x, platform.y, platform.width, platform.height, platform.hBitmap);//платформы
-    //}
-  /*  for (int i = 0; i < loc[player.current_location].enemies.size(); i++) {
+    for (int i = 0; i < loc[player.current_location].plats.size(); i++)
+    {
+        auto platform = loc[player.current_location].plats[i].pl_sprite;
+        ShowBitmap(window.context, platform.x, platform.y, platform.width, platform.height, platform.hBitmap);//платформы
+    }
+    for (int i = 0; i < loc[player.current_location].enemies.size(); i++) {
         auto enemy = loc[player.current_location].enemies[i].en_sprite;
         ShowBitmap(window.context, enemy.x, enemy.y, enemy.width, enemy.height, enemy.hBitmap);
-    }*/
+    }
     //ShowBitmap(window.context, enemy.enemy_sprite.x, enemy.enemy_sprite.y, enemy.enemy_sprite.width, enemy.enemy_sprite.height, enemy.enemy_sprite.hBitmap);
 }
 
@@ -433,11 +441,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         BitBlt(window.device_context, 0, 0, window.width, window.height, window.context, 0, 0, SRCCOPY);//копируем буфер в окно
         Sleep(16);//ждем 16 милисекунд (1/количество кадров в секунду)
 
-        //Collusion();//коллизия
-        //for (auto& p : loc[player.current_location].enemies) {
-        //    p.EnemyMove();
+        Collusion();//коллизия
+        for (auto& p : loc[player.current_location].enemies) {
+            p.EnemyMove();
 
-        //}
+        }
         LimitHero();//проверяем, чтобы ракетка не убежала за экран
     }
 
