@@ -35,6 +35,8 @@ struct player_ {
     int life = 10;
     int current_location = 0;
     vector <item_> player_items;
+    HBITMAP hBitmapRight;
+    HBITMAP hBitmapLeft;
 };
 
 player_ player;
@@ -70,6 +72,9 @@ public:
     float endPos;
     bool Moving;
     sprite en_sprite;
+    HBITMAP hBitmapRight;
+    HBITMAP hBitmapLeft;
+
 
     Enemy( int en_x, int en_y, int EndPos, int sp ) {
 
@@ -80,11 +85,15 @@ public:
         en_sprite.speed = sp;
         en_sprite.height = 100;
         en_sprite.width = 100;
+        //hBitmapRight = Show("enemy_right.bmp");
+        //hBitmapLeft = Show("enemy_left.bmp");
         en_sprite.hBitmap = Show("enemy_right.bmp");
     }
 
     ~Enemy() {
         DeleteObject(en_sprite.hBitmap);
+        //DeleteObject(hBitmapRight);
+        //DeleteObject(hBitmapLeft);
     }
 
     void EnemyMove() {
@@ -109,7 +118,6 @@ public:
             }
         }
     }
-
 };
 
 
@@ -171,33 +179,33 @@ void InitGame()
     loc[2].items.push_back(itemLib[(int)itemID::hemlet]);
 
     loc[0].plats.emplace_back(window.width / 1.9, window.height - 200, 60, 600);
-    //loc[0].plats.emplace_back(window.width / 6, window.height - 60, 60, 600);
     loc[0].plats.emplace_back(window.width / 6, window.height - 350, 60, 600);
     loc[1].plats.emplace_back(0, window.height - 200, 60, 900);
     loc[1].plats.emplace_back(window.width / 1.7, window.height - 200, 60, window.width - window.width / 1.7);
-    loc[2].plats.emplace_back(100, window.height - 200, 60, 200);
-    loc[2].plats.emplace_back(600, window.height - 200, 60, 200);
-    loc[2].plats.emplace_back(1200, window.height - 200, 60, 200);
+    loc[2].plats.emplace_back(window.width / 23, window.height - 400, 60, 600);
+    loc[2].plats.emplace_back(window.width / 6, window.height - 200, 60, 1000);
+    loc[2].plats.emplace_back(window.width / 1.4, window.height - 500, 60, 600);
 
-    loc[0].enemies.emplace_back(500, window.height - 100, 1000, 3);
-    loc[0].enemies.emplace_back(800, window.height - 100, 1100, 3);
-    loc[0].enemies.emplace_back(650, window.height - 100, 1100, 3);
-    //loc[0].enemies.emplace_back(800, window.height - 100, 1100, 3);
-    //loc[0].enemies.emplace_back(800, window.height - 100, 1100, 3);
-    loc[1].enemies.emplace_back(800, window.height - 100, 1100, 3);
-    loc[1].enemies.emplace_back(500, window.height - 100, 1100, 3);
+    loc[0].enemies.emplace_back(window.width / 1.9, window.height - 300, window.width / 1.9 + 500, 3);
+    loc[0].enemies.emplace_back(window.width / 6, window.height - 450, window.width / 6 + 500, 3);
+    loc[0].enemies.emplace_back(window.width / 4, window.height - 100, window.width / 4 + 500, 3);
+    loc[1].enemies.emplace_back(window.width / 4, window.height - 100, window.width / 4 + 500, 3);
+    loc[1].enemies.emplace_back(window.width / 1.4, window.height - 300, window.width / 1.1, 3);
 
     LocInfo(0, "loc0.bmp", 2, 1);
     LocInfo(1, "loc1.bmp", 0, 2);
     LocInfo(2, "loc2.bmp", 1, 0);
 
-    player.current_location = 0;
+    player.current_location = 2;
     player.hero_sprite.x = 100;
     player.hero_sprite.y = window.height - 100;
     player.hero_sprite.width = 100;
     player.hero_sprite.height = 100;
     player.hero_sprite.hBitmap = Show("hero_right.bmp");
     player.hero_sprite.speed = 25;
+    player.hBitmapRight = Show("hero_right.bmp");
+    player.hBitmapLeft = Show("hero_left.bmp");
+    player.hero_sprite.hBitmap = player.hBitmapRight;
 
     
 }
@@ -254,11 +262,11 @@ bool isJumping = false;
 void ProcessInput()
 {
     if (GetAsyncKeyState('A')) {
-        player.hero_sprite.hBitmap = Show("hero_left.bmp");
+        player.hero_sprite.hBitmap = player.hBitmapLeft;
         player.hero_sprite.x -= player.hero_sprite.speed;
     }
     if (GetAsyncKeyState('D')) {
-        player.hero_sprite.hBitmap = Show("hero_right.bmp");
+        player.hero_sprite.hBitmap = player.hBitmapRight;
         player.hero_sprite.x += player.hero_sprite.speed;
     }
     auto pl_s = player.hero_sprite;
@@ -277,32 +285,6 @@ void ProcessInput()
         player.hero_sprite.y = min(window.height - player.hero_sprite.height, player.hero_sprite.y);
         jump *= 0.8;
 }
-
-
-
-//void Enemy::EnemyMove() {
-//    /*for (int i = 0; i < loc[player.current_location].enemies.size(); i++) {
-//        auto& enemy = loc[player.current_location].enemies[i];*/
-//
-//        if (Moving) {
-//            en_sprite.x += en_sprite.speed;
-//            en_sprite.hBitmap = Show("enemy_right.bmp");
-//
-//            if (en_sprite.x >= endPos) {
-//                Moving = false;  
-//            }
-//        }
-//        else {
-//            en_sprite.x -= en_sprite.speed;
-//            en_sprite.hBitmap = Show("enemy_left.bmp");
-//
-//            if (en_sprite.x <= startPos) {
-//                Moving = true; 
-//            }
-//        }
-//    //}
-//}
-
 
 void Collusion()
 {
