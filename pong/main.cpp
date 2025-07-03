@@ -32,7 +32,7 @@ vector<item_> itemLib;
 
 struct player_ {
     sprite hero_sprite;
-    int life = 10;
+    int life;
     int current_location = 0;
     vector <item_> player_items;
     HBITMAP hBitmapRight;
@@ -41,13 +41,10 @@ struct player_ {
 
 player_ player;
 
-struct platform_ {
-    sprite plat_sprite;
-};
-
-auto Show(LPCSTR name) {
-    return (HBITMAP)LoadImageA(NULL, name, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    DeleteObject((HBITMAP)LoadImageA(NULL, name, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE));
+auto Load(LPCSTR name) {
+    HBITMAP pict = (HBITMAP)LoadImageA(NULL, name, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    return pict;
+    DeleteObject(pict);
 }
 
 class Platform
@@ -61,8 +58,11 @@ public:
         pl_sprite.y = plat_y;
         pl_sprite.height = plat_height;
         pl_sprite.width = plat_width;
-        pl_sprite.hBitmap = Show("platform.bmp");
+        pl_sprite.hBitmap = Load("platform.bmp");
     }
+    //~Platform() {
+    //    DeleteObject(pl_sprite.hBitmap);
+    //}
 };
 
 class Enemy {
@@ -87,7 +87,7 @@ public:
         en_sprite.width = 100;
         //hBitmapRight = Show("enemy_right.bmp");
         //hBitmapLeft = Show("enemy_left.bmp");
-        en_sprite.hBitmap = Show("enemy_right.bmp");
+        en_sprite.hBitmap = Load("enemy_right.bmp");
     }
 
     ~Enemy() {
@@ -103,7 +103,7 @@ public:
 
         if (Moving) {
             en_sprite.x += en_sprite.speed;
-            en_sprite.hBitmap = Show("enemy_right.bmp");
+            en_sprite.hBitmap = Load("enemy_right.bmp");
 
             if (en_sprite.x >= endPos) {
                 Moving = false;
@@ -111,15 +111,92 @@ public:
         }
         else {
             en_sprite.x -= en_sprite.speed;
-            en_sprite.hBitmap = Show("enemy_left.bmp");
+            en_sprite.hBitmap = Load("enemy_left.bmp");
 
             if (en_sprite.x <= startPos) {
                 Moving = true;
             }
         }
     }
+    void EnemyCollusion() {
+        auto& pl_s = player.hero_sprite;
+        
+        if (pl_s.y <= en_sprite.y + en_sprite.height &&
+            pl_s.y + pl_s.height >= en_sprite.y &&
+            pl_s.x <= en_sprite.x + en_sprite.width &&
+            pl_s.x + pl_s.width >= en_sprite.x) 
+        {
+            int UP = abs(en_sprite.y - (pl_s.y + pl_s.height));
+            int DOWN = abs((en_sprite.y + en_sprite.height) - pl_s.y);
+            int over_y = min(UP, DOWN);
+
+            int LEFT = abs(en_sprite.x - (pl_s.x + pl_s.width));
+            int RIGHT = abs((en_sprite.x + en_sprite.width) - pl_s.x);
+            int over_x = min(LEFT, RIGHT);
+
+            if (over_x < over_y) {
+                if (LEFT < RIGHT) {
+                    pl_s.x = en_sprite.x - pl_s.width;
+                    pl_s.x -= 100;
+                }
+                else {
+                    pl_s.x = en_sprite.x + en_sprite.width;
+                    pl_s.x += 100;
+                }
+            }
+            else {
+                if (UP < DOWN) {
+                    pl_s.y = en_sprite.y - pl_s.height;
+                    pl_s.x += 200;
+                }
+                else {
+                    pl_s.y = en_sprite.y + en_sprite.height;
+                }
+            }
+            player.life -= 1;
+            pl_s.y -= 70;
+        }
+    }
 };
 
+/*if (pl_s.y <= platform.y + platform.height &&
+            pl_s.y + pl_s.height >= platform.y &&
+            pl_s.x <= platform.x + platform.width &&
+            pl_s.x + pl_s.width >= platform.x)
+        {
+
+            int UP = abs(platform.y - (pl_s.y + pl_s.height));
+            int DOWN = abs((platform.y + platform.height) - pl_s.y);
+            int over_Y = min(UP, DOWN);
+
+            int LEFT = abs(platform.x - (pl_s.x + pl_s.width));
+            int RIGHT = abs(platform.x + platform.width - pl_s.x);
+            int over_X = min(LEFT, RIGHT);
+
+            if (over_X < over_Y)
+            {
+                if (LEFT < RIGHT)
+                {
+                    player.hero_sprite.x = platform.x - pl_s.width;
+                }
+                else
+                {
+                    player.hero_sprite.x = platform.x + platform.width;
+                }
+            }
+            else {
+
+                if (UP < DOWN)
+                {
+                    player.hero_sprite.y = platform.y - player.hero_sprite.height;
+                    isJumping = false;
+                }
+                else
+                {
+                    player.hero_sprite.y = platform.y + platform.height;
+                }
+            }
+        }*/
 
 struct location_ {
     HBITMAP hBitmap;
@@ -157,13 +234,13 @@ void ItemInfo(string name, int x, int y, int height, int width, LPCSTR it_name)
     i.Sprite.y = y;
     i.Sprite.height = height;
     i.Sprite.width = width;
-    i.Sprite.hBitmap = Show(it_name);
+    i.Sprite.hBitmap = Load(it_name);
     itemLib.push_back(i);
 }
 
 void LocInfo(int numb, LPCSTR loc_name, int l_port, int r_port) 
 {
-    loc[numb].hBitmap = Show(loc_name);
+    loc[numb].hBitmap = Load(loc_name);
     loc[numb].left_portal = l_port;
     loc[numb].right_portal = r_port;
 }
@@ -196,15 +273,16 @@ void InitGame()
     LocInfo(1, "loc1.bmp", 0, 2);
     LocInfo(2, "loc2.bmp", 1, 0);
 
-    player.current_location = 2;
+    player.current_location = 0;
+    player.life = 10;
     player.hero_sprite.x = 100;
     player.hero_sprite.y = window.height - 100;
     player.hero_sprite.width = 100;
     player.hero_sprite.height = 100;
-    player.hero_sprite.hBitmap = Show("hero_right.bmp");
+    //player.hero_sprite.hBitmap = Load("hero_right.bmp");
     player.hero_sprite.speed = 25;
-    player.hBitmapRight = Show("hero_right.bmp");
-    player.hBitmapLeft = Show("hero_left.bmp");
+    player.hBitmapRight = Load("hero_right.bmp");
+    player.hBitmapLeft = Load("hero_left.bmp");
     player.hero_sprite.hBitmap = player.hBitmapRight;
 
     
@@ -284,6 +362,15 @@ void ProcessInput()
         player.hero_sprite.y += gravity - jump;
         player.hero_sprite.y = min(window.height - player.hero_sprite.height, player.hero_sprite.y);
         jump *= 0.8;
+}
+
+void GameOver() {
+    if (player.life == 0) {
+        for (int i = 0; i <= 2; i++) {
+            loc[i].enemies.clear();
+    }
+    InitGame();
+    }
 }
 
 void Collusion()
@@ -416,9 +503,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     
     while (!GetAsyncKeyState(VK_ESCAPE))
     {
+        GameOver();
         ShowSprites();//рисуем фон, героя, предметы и платформы
         ProcessInput();//опрос клавиатуры
-        
+
         ShowScore();//рисуем очик и жизни
         BitBlt(window.device_context, 0, 0, window.width, window.height, window.context, 0, 0, SRCCOPY);//копируем буфер в окно
         Sleep(16);//ждем 16 милисекунд (1/количество кадров в секунду)
@@ -426,6 +514,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         Collusion();//коллизия
         for (auto& p : loc[player.current_location].enemies) {
             p.EnemyMove();
+            p.EnemyCollusion();
 
         }
         LimitHero();//проверяем, чтобы ракетка не убежала за экран
