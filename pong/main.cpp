@@ -42,9 +42,7 @@ struct player_ {
 player_ player;
 
 auto Load(LPCSTR name) {
-    HBITMAP pict = (HBITMAP)LoadImageA(NULL, name, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-    return pict;
-    DeleteObject(pict);
+    return (HBITMAP)LoadImageA(NULL, name, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 }
 
 class Platform
@@ -85,15 +83,11 @@ public:
         en_sprite.speed = sp;
         en_sprite.height = 100;
         en_sprite.width = 100;
-        //hBitmapRight = Show("enemy_right.bmp");
-        //hBitmapLeft = Show("enemy_left.bmp");
         en_sprite.hBitmap = Load("enemy_right.bmp");
     }
 
     ~Enemy() {
         DeleteObject(en_sprite.hBitmap);
-        //DeleteObject(hBitmapRight);
-        //DeleteObject(hBitmapLeft);
     }
 
     void EnemyMove() {
@@ -158,45 +152,6 @@ public:
         }
     }
 };
-
-/*if (pl_s.y <= platform.y + platform.height &&
-            pl_s.y + pl_s.height >= platform.y &&
-            pl_s.x <= platform.x + platform.width &&
-            pl_s.x + pl_s.width >= platform.x)
-        {
-
-            int UP = abs(platform.y - (pl_s.y + pl_s.height));
-            int DOWN = abs((platform.y + platform.height) - pl_s.y);
-            int over_Y = min(UP, DOWN);
-
-            int LEFT = abs(platform.x - (pl_s.x + pl_s.width));
-            int RIGHT = abs(platform.x + platform.width - pl_s.x);
-            int over_X = min(LEFT, RIGHT);
-
-            if (over_X < over_Y)
-            {
-                if (LEFT < RIGHT)
-                {
-                    player.hero_sprite.x = platform.x - pl_s.width;
-                }
-                else
-                {
-                    player.hero_sprite.x = platform.x + platform.width;
-                }
-            }
-            else {
-
-                if (UP < DOWN)
-                {
-                    player.hero_sprite.y = platform.y - player.hero_sprite.height;
-                    isJumping = false;
-                }
-                else
-                {
-                    player.hero_sprite.y = platform.y + platform.height;
-                }
-            }
-        }*/
 
 struct location_ {
     HBITMAP hBitmap;
@@ -279,7 +234,6 @@ void InitGame()
     player.hero_sprite.y = window.height - 100;
     player.hero_sprite.width = 100;
     player.hero_sprite.height = 100;
-    //player.hero_sprite.hBitmap = Load("hero_right.bmp");
     player.hero_sprite.speed = 25;
     player.hBitmapRight = Load("hero_right.bmp");
     player.hBitmapLeft = Load("hero_left.bmp");
@@ -364,12 +318,53 @@ void ProcessInput()
         jump *= 0.8;
 }
 
+void ClearVectors() //сначала очищаем битмапки, потом сами векторы
+{
+    for (int i = 0; i <= 2; i++) {
+        for (auto& enemy : loc[i].enemies) {
+            if (enemy.en_sprite.hBitmap) {
+                DeleteObject(enemy.en_sprite.hBitmap);
+            }
+        }
+        loc[i].enemies.clear();
+
+        for (auto& plat : loc[i].plats) {
+            if (plat.pl_sprite.hBitmap) {
+                DeleteObject(plat.pl_sprite.hBitmap);
+            }
+        }
+        loc[i].plats.clear();
+
+        for (auto& item : loc[i].items) {
+            if (item.Sprite.hBitmap) {
+                DeleteObject(item.Sprite.hBitmap);
+            }
+        }
+        loc[i].items.clear();
+    }
+
+    for (auto& item : player.player_items) 
+    {
+        if (item.Sprite.hBitmap) {
+            DeleteObject(item.Sprite.hBitmap);
+        }
+    }
+    player.player_items.clear();
+
+    for (auto& item : itemLib) 
+    {
+        if (item.Sprite.hBitmap) {
+            DeleteObject(item.Sprite.hBitmap);
+        }
+    }
+    itemLib.clear();
+
+}
+
 void GameOver() {
     if (player.life == 0) {
-        for (int i = 0; i <= 2; i++) {
-            loc[i].enemies.clear();
-    }
-    InitGame();
+        ClearVectors();
+        InitGame();
     }
 }
 
@@ -489,6 +484,37 @@ void InitWindow()
 
 }
 
+//void CleanupResources() {
+//    // Очистка битмапов игрока
+//    if (player.hBitmapRight) DeleteObject(player.hBitmapRight);
+//    if (player.hBitmapLeft) DeleteObject(player.hBitmapLeft);
+//
+//    // Очистка битмапов локаций
+//    for (int i = 0; i < 5; i++) {
+//        if (loc[i].hBitmap) DeleteObject(loc[i].hBitmap);
+//    }
+//
+//    // Очистка битмапов предметов
+//    for (auto& item : itemLib) {
+//        if (item.Sprite.hBitmap) DeleteObject(item.Sprite.hBitmap);
+//    }
+//
+//    // Очистка битмапов платформ
+//    for (int i = 0; i < 5; i++) {
+//        for (auto& plat : loc[i].plats) {
+//            if (plat.pl_sprite.hBitmap) DeleteObject(plat.pl_sprite.hBitmap);
+//        }
+//    }
+//
+//    //// Очистка контекстов устройства
+//    //if (window.context) {
+//    //    DeleteDC(window.context);
+//    //}
+//    //if (window.device_context) {
+//    //    ReleaseDC(window.hWnd, window.device_context);
+//    //}
+//}
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,
     _In_ LPWSTR    lpCmdLine,
@@ -504,7 +530,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     while (!GetAsyncKeyState(VK_ESCAPE))
     {
         GameOver();
+        
         ShowSprites();//рисуем фон, героя, предметы и платформы
+        
         ProcessInput();//опрос клавиатуры
 
         ShowScore();//рисуем очик и жизни
@@ -518,6 +546,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         }
         LimitHero();//проверяем, чтобы ракетка не убежала за экран
+        //CleanupResources(); //ОЧИЩАЕМ БИТМАПКИ
     }
 
 }
