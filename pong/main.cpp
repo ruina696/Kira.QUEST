@@ -211,6 +211,7 @@ void InitGame()
     loc[2].items.push_back(itemLib[(int)itemID::hemlet]);
 
     loc[0].plats.emplace_back(window.width / 1.9, window.height - 200, 60, 600);
+    loc[0].plats.emplace_back(window.width / 1.9, window.height - 200, 600, 60);
     loc[0].plats.emplace_back(window.width / 6, window.height - 350, 60, 600);
     loc[1].plats.emplace_back(0, window.height - 200, 60, 900);
     loc[1].plats.emplace_back(window.width / 1.7, window.height - 200, 60, window.width - window.width / 1.7);
@@ -234,7 +235,7 @@ void InitGame()
     player.hero_sprite.y = window.height - 100;
     player.hero_sprite.width = 100;
     player.hero_sprite.height = 100;
-    player.hero_sprite.speed = 25;
+    player.hero_sprite.speed = 100;
     player.hBitmapRight = Load("hero_right.bmp");
     player.hBitmapLeft = Load("hero_left.bmp");
     player.hero_sprite.hBitmap = player.hBitmapRight;
@@ -258,6 +259,7 @@ void ShowScore()
     _itoa_s(game.balls, txt, 10);
     TextOutA(window.context, 10, 100, "ITEMS", 5);
 }
+
 
 void ShowBitmap(HDC hDC, int x, int y, int x1, int y1, HBITMAP hBitmapBall, bool alpha = false)
 {
@@ -305,7 +307,7 @@ void ProcessInput()
 
         
         if ( GetAsyncKeyState('W') && !isJumping) {
-            jump = 70;
+            jump = 150;
             isJumping = true;
         }
         
@@ -363,6 +365,7 @@ void ClearVectors() //сначала очищаем битмапки, потом
 
 void GameOver() {
     if (player.life == 0) {
+        MessageBox(window.hWnd ,"Вы погибли", "PORNO", MB_OK);
         ClearVectors();
         InitGame();
     }
@@ -417,7 +420,34 @@ void Collusion()
     }
 }
 
+void Trace() {
+    int trx_st = player.hero_sprite.x;
+    int try_st = player.hero_sprite.y;
+    int trx_end = player.hero_sprite.x;
+    int try_end = player.hero_sprite.y;
+    float lenth;
+    //SetPixel(window.context, trx_st, try_st, 0x000000FF);
+    if (GetAsyncKeyState('D')) {
+        trx_end = trx_st + player.hero_sprite.speed;
+        lenth = pow((pow((trx_end - trx_st), 2) + pow((try_end - try_st), 2)), 0.5);
 
+        /*for (int i = 0; i <= loc[player.current_location].plats.size(); i++) {
+
+        }*/
+
+        for (float i = 0; i < lenth; i++) {
+            float newX = trx_st + (trx_st + player.hero_sprite.speed) * (i/lenth);
+            SetPixel(window.context, newX, player.hero_sprite.y, 0x000000FF);
+            
+        }
+        //if ()
+    }
+    if (GetAsyncKeyState('A')) {
+        trx_end = trx_st - player.hero_sprite.speed;
+
+    }
+    //SetPixel(window.context, trx_st + player.hero_sprite.speed, try_st, 0x000000FF);
+}
 
 
 void ShowSprites()
@@ -535,16 +565,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         
         ProcessInput();//опрос клавиатуры
 
+        Trace();
         ShowScore();//рисуем очик и жизни
         BitBlt(window.device_context, 0, 0, window.width, window.height, window.context, 0, 0, SRCCOPY);//копируем буфер в окно
         Sleep(16);//ждем 16 милисекунд (1/количество кадров в секунду)
 
         Collusion();//коллизия
-        for (auto& p : loc[player.current_location].enemies) {
+        /*for (auto& p : loc[player.current_location].enemies) {
             p.EnemyMove();
             p.EnemyCollusion();
 
-        }
+        }*/
         LimitHero();//проверяем, чтобы ракетка не убежала за экран
         //CleanupResources(); //ОЧИЩАЕМ БИТМАПКИ
     }
