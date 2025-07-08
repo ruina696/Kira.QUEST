@@ -8,6 +8,8 @@
 #include <string>
 #include <time.h>
 #include <math.h>
+#include <any>
+
 
 using namespace std;
 
@@ -63,6 +65,67 @@ public:
     //}
 };
 
+
+
+class Character {
+public:
+    sprite Sprite;
+    int life;
+    HBITMAP Sprite_Right;
+    HBITMAP Sprite_Left;
+    int a = 0;
+
+    /*Character(int x, int y, int height, int width, LPCSTR name) 
+    {
+        Sprite.x = x;
+        Sprite.y = y;
+        Sprite.height = height;
+        Sprite.width = width;
+        Sprite.hBitmap = Load(name);
+    }*/
+
+    void Move() {
+        a = 7;
+    }
+};
+
+//class Hero : Character {
+//public:
+//    int current_location;
+//    vector<item_> player_items;
+//
+//    Hero() 
+//    {
+//
+//    }
+//
+//    void Move() {
+//
+//    }
+//};
+
+class Wolf : Character {
+public:
+    int b;
+    void Move() {
+        b = 5;
+    }
+};
+
+class Hare : Character {
+public:
+    void Move() {
+        a = 3;
+    }
+};
+
+vector<Character> chars;
+
+//class Enemy : Character {
+//public:
+//
+//};
+
 class Enemy {
 public:
     int life = 5;
@@ -70,8 +133,6 @@ public:
     float endPos;
     bool Moving;
     sprite en_sprite;
-    HBITMAP hBitmapRight;
-    HBITMAP hBitmapLeft;
 
 
     Enemy( int en_x, int en_y, int EndPos, int sp ) {
@@ -235,13 +296,31 @@ void InitGame()
     player.hero_sprite.y = window.height - 100;
     player.hero_sprite.width = 100;
     player.hero_sprite.height = 100;
-    player.hero_sprite.speed = 100;
+    player.hero_sprite.speed = 25;
     player.hBitmapRight = Load("hero_right.bmp");
     player.hBitmapLeft = Load("hero_left.bmp");
     player.hero_sprite.hBitmap = player.hBitmapRight;
 
+    Character a1;
+    //a1.Move();
+    Wolf a2;
+    //a2.Move();
+    Hare a3;
+    //a3.Move();
+    
+    std::any g = 1;
+
+
+    chars.emplace_back(a1);
+    chars.emplace_back(a2);
+    chars.emplace_back(a3);
+    for (int i = 0; i <= chars.size(); i++) {
+        chars[i].Move();
+    }
     
 }
+
+HFONT hFont = NULL;
 
 void ShowScore()
 {
@@ -249,7 +328,11 @@ void ShowScore()
     SetTextColor(window.context, RGB(160, 160, 160));
     SetBkColor(window.context, RGB(0, 0, 0));
     SetBkMode(window.context, TRANSPARENT);
-    auto hFont = CreateFont(70, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 2, 0, "CALIBRI");
+    if (!hFont)
+    {
+        hFont = CreateFont(70, 0, 0, 0, FW_BOLD, 0, 0, 0, 0, 0, 0, 2, 0, "CALIBRI");
+    }
+
     auto hTmp = (HFONT)SelectObject(window.context, hFont);
 
     char txt[32];//буфер для текста
@@ -307,7 +390,7 @@ void ProcessInput()
 
         
         if ( GetAsyncKeyState('W') && !isJumping) {
-            jump = 150;
+            jump = 70;
             isJumping = true;
         }
         
@@ -571,11 +654,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         Sleep(16);//ждем 16 милисекунд (1/количество кадров в секунду)
 
         Collusion();//коллизия
-        /*for (auto& p : loc[player.current_location].enemies) {
+        for (auto& p : loc[player.current_location].enemies) {
             p.EnemyMove();
             p.EnemyCollusion();
 
-        }*/
+        }
         LimitHero();//проверяем, чтобы ракетка не убежала за экран
         //CleanupResources(); //ОЧИЩАЕМ БИТМАПКИ
     }
