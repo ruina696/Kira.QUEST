@@ -3,13 +3,10 @@
 //linker::input::additional dependensies Msimg32.lib; Winmm.lib
 
 
-#include "windows.h"
-#include <vector>
-#include <string>
-#include <time.h>
-#include <math.h>
-#include <any>
-#include <memory>
+
+
+#include"PornHub.h"
+
 
 
 using namespace std;
@@ -75,20 +72,46 @@ public:
     HBITMAP Sprite_Right;
     HBITMAP Sprite_Left;
     int a = 0;
+    float Startpos;
+    float Endpos;
+    bool Moving;
 
-    /*Character(int x, int y, int height, int width, LPCSTR name) 
+    Character(int x, int y, float endpos, int sp) 
     {
         Sprite.x = x;
         Sprite.y = y;
-        Sprite.height = height;
-        Sprite.width = width;
-        Sprite.hBitmap = Load(name);
-    }*/
+        Startpos = x;
+        Endpos = endpos;
+        Sprite.height = 100;
+        Sprite.width = 100;
+        Sprite.speed = sp;
+        Sprite.hBitmap = Load("enemy_right.bmp");
+    }
 
     virtual void Move() {
         a = 7;
+        //if (Sprite.hBitmap) {
+        //    DeleteObject(Sprite.hBitmap);
+        //}
+
+        if (Moving) {
+            Sprite.x += Sprite.speed;
+            //Sprite.hBitmap = Load("enemy_right.bmp");
+
+            if (Sprite.x >= Endpos) {
+                Moving = false;
+            }
+        }
+        else {
+            Sprite.x -= Sprite.speed;
+            //Sprite.hBitmap = Load("enemy_left.bmp");
+
+            if (Sprite.x <= Startpos) {
+                Moving = true;
+            }
+        }
     }
-    virtual ~Character() {}
+     ~Character() {}
 };
 
 //class Hero : Character {
@@ -109,24 +132,81 @@ public:
 class Wolf : public Character {
 public:
     int b = 0;
+
+    Wolf(int x, int y, float endpos, int sp, int height, int width) : Character(x, y, endpos, sp)
+    {
+        Sprite.x = x;
+        Sprite.y = y;
+        Startpos = x;
+        Endpos = endpos;
+        Sprite.speed = sp;
+        //Sprite.hBitmap = Load("enemy_right.bmp");
+        Sprite.height = height;
+        Sprite.width = width;
+    }
     void Move() override {
         b = 5;
+       /* if (Sprite.hBitmap) {
+            DeleteObject(Sprite.hBitmap);
+        }*/
+
+        if (Moving) {
+            Sprite.x += Sprite.speed;
+            //Sprite.hBitmap = Load("enemy_right.bmp");
+
+            if (Sprite.x >= Endpos) {
+                Moving = false;
+            }
+        }
+        else {
+            Sprite.x -= Sprite.speed;
+            //Sprite.hBitmap = Load("enemy_left.bmp");
+
+            if (Sprite.x <= Startpos) {
+                Moving = true;
+            }
+        }
     }
 };
 
 class Hare : public Character {
 public:
+    Hare(int x, int y, float endpos, int sp,  int height, int width) : Character(x, y, endpos, sp)
+    {
+        Sprite.x = x;
+        Sprite.y = y;
+        Startpos = x;
+        Endpos = endpos;
+        Sprite.speed = sp;
+        //Sprite.hBitmap = Load("enemy_right.bmp");
+        Sprite.height = height;
+        Sprite.width = width;
+    }
     void Move() override {
         a = 3;
+        //if (Sprite.hBitmap) {
+        //    DeleteObject(Sprite.hBitmap);
+        //}
+
+        if (Moving) {
+            Sprite.x += Sprite.speed;
+            //Sprite.hBitmap = Load("enemy_right.bmp");
+
+            if (Sprite.x >= Endpos) {
+                Moving = false;
+            }
+        }
+        else {
+            Sprite.x -= Sprite.speed;
+            //Sprite.hBitmap = Load("enemy_left.bmp");
+
+            if (Sprite.x <= Startpos) {
+                Moving = true;
+            }
+        }
     }
 };
-vector<unique_ptr<Character>> chars2;
-vector<Character*> chars;
-
-//class Enemy : Character {
-//public:
-//
-//};
+//vector<Character*> chars;
 
 class Enemy {
 public:
@@ -216,6 +296,7 @@ public:
     }
 };
 
+
 struct location_ {
     HBITMAP hBitmap;
     int left_portal;
@@ -223,6 +304,7 @@ struct location_ {
     vector<Platform> plats;
     vector <item_> items;
     vector <Enemy> enemies;
+    vector <Character*> chars;
 };
 
 location_ loc[5];
@@ -239,8 +321,10 @@ struct {
     int width, height;//сюда сохраним размеры окна которое создаст программа
 } window;
 
+
 HBITMAP hBack;// хэндл для фонового изображения
 
+    Character sam(100, 1100, 300, 15);
 //cекция кода
 
 
@@ -282,9 +366,9 @@ void InitGame()
     loc[2].plats.emplace_back(window.width / 6, window.height - 200, 60, 1000);
     loc[2].plats.emplace_back(window.width / 1.4, window.height - 500, 60, 600);
 
-    loc[0].enemies.emplace_back(window.width / 1.9, window.height - 300, window.width / 1.9 + 500, 3);
-    loc[0].enemies.emplace_back(window.width / 6, window.height - 450, window.width / 6 + 500, 3);
-    loc[0].enemies.emplace_back(window.width / 4, window.height - 100, window.width / 4 + 500, 3);
+    //loc[0].enemies.emplace_back(window.width / 1.9, window.height - 300, window.width / 1.9 + 500, 3);
+    //loc[0].enemies.emplace_back(window.width / 6, window.height - 450, window.width / 6 + 500, 3);
+    //loc[0].enemies.emplace_back(window.width / 4, window.height - 100, window.width / 4 + 500, 3);
     loc[1].enemies.emplace_back(window.width / 4, window.height - 100, window.width / 4 + 500, 3);
     loc[1].enemies.emplace_back(window.width / 1.4, window.height - 300, window.width / 1.1, 3);
 
@@ -303,27 +387,15 @@ void InitGame()
     player.hBitmapLeft = Load("hero_left.bmp");
     player.hero_sprite.hBitmap = player.hBitmapRight;
 
-    Character* a1 = new Character();
-    Wolf* a2 = new Wolf();
-    Hare* a3 = new Hare();
+    //Character character(100, window.height,300, 15);
+    Character* a1 = new Character(1000, 1100, 1500, 15);
+    Wolf* a2 = new Wolf(500, window.height - 300, 1000, 25, 150, 150);
+    Hare* a3 = new Hare(1500, 500, 1700, 5, 50, 50);
     
-    chars.push_back(a1);
-    chars.push_back(a2);
-    chars.push_back(a3);
+    loc[0].chars.push_back(a1);
+    loc[0].chars.push_back(a2);
+    loc[0].chars.push_back(a3);
 
-    for (Character* charact : chars) {
-        charact->Move();
-    }
-
-    //std::any g = 1;
-
-    chars2.emplace_back(make_unique<Character>());
-    chars2.emplace_back(make_unique<Wolf>());
-    chars2.emplace_back(make_unique<Hare>());
-    for (const auto& character : chars2) {
-        character->Move();
-    }
-    
 }
 
 HFONT hFont = NULL;
@@ -568,10 +640,23 @@ void ShowSprites()
         auto platform = loc[player.current_location].plats[i].pl_sprite;
         ShowBitmap(window.context, platform.x, platform.y, platform.width, platform.height, platform.hBitmap);//платформы
     }
-    for (int i = 0; i < loc[player.current_location].enemies.size(); i++) {
+  /*  for (int i = 0; i < loc[player.current_location].enemies.size(); i++) {
         auto enemy = loc[player.current_location].enemies[i].en_sprite;
         ShowBitmap(window.context, enemy.x, enemy.y, enemy.width, enemy.height, enemy.hBitmap);
+    }*/
+
+    for (int i = 0; i < loc[player.current_location].chars.size(); i++) {
+        auto charact = loc[player.current_location].chars[i]->Sprite;
+        if (!charact.hBitmap) {
+            MessageBox(window.hWnd, "ПУСТО", "PORNO", MB_OK);
+        }
+        else {
+            ShowBitmap(window.context, charact.x, charact.y,
+                charact.width, charact.height,
+                charact.hBitmap);
+        }
     }
+    //ShowBitmap(window.context, sam.Sprite.x, sam.Sprite.y, sam.Sprite.width, sam.Sprite.height, sam.Sprite.hBitmap);
 }
 
 void LimitHero()
@@ -632,6 +717,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             p.EnemyMove();
             p.EnemyCollusion();
 
+        }
+        for (Character* charact : loc[player.current_location].chars) {
+            charact->Move();
         }
         LimitHero();//проверяем, чтобы ракетка не убежала за экран
     }
