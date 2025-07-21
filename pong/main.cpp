@@ -9,6 +9,7 @@
 #include <time.h>
 #include <math.h>
 #include <any>
+#include <memory>
 
 
 using namespace std;
@@ -84,9 +85,10 @@ public:
         Sprite.hBitmap = Load(name);
     }*/
 
-    void Move() {
+    virtual void Move() {
         a = 7;
     }
+    virtual ~Character() {}
 };
 
 //class Hero : Character {
@@ -104,22 +106,22 @@ public:
 //    }
 //};
 
-class Wolf : Character {
+class Wolf : public Character {
 public:
-    int b;
-    void Move() {
+    int b = 0;
+    void Move() override {
         b = 5;
     }
 };
 
-class Hare : Character {
+class Hare : public Character {
 public:
-    void Move() {
+    void Move() override {
         a = 3;
     }
 };
-
-vector<Character> chars;
+vector<unique_ptr<Character>> chars2;
+vector<Character*> chars;
 
 //class Enemy : Character {
 //public:
@@ -301,21 +303,25 @@ void InitGame()
     player.hBitmapLeft = Load("hero_left.bmp");
     player.hero_sprite.hBitmap = player.hBitmapRight;
 
-    Character a1;
-    //a1.Move();
-    Wolf a2;
-    //a2.Move();
-    Hare a3;
-    //a3.Move();
+    Character* a1 = new Character();
+    Wolf* a2 = new Wolf();
+    Hare* a3 = new Hare();
     
-    std::any g = 1;
+    chars.push_back(a1);
+    chars.push_back(a2);
+    chars.push_back(a3);
 
+    for (Character* charact : chars) {
+        charact->Move();
+    }
 
-    chars.emplace_back(a1);
-    chars.emplace_back(a2);
-    chars.emplace_back(a3);
-    for (int i = 0; i <= chars.size(); i++) {
-        chars[i].Move();
+    //std::any g = 1;
+
+    chars2.emplace_back(make_unique<Character>());
+    chars2.emplace_back(make_unique<Wolf>());
+    chars2.emplace_back(make_unique<Hare>());
+    for (const auto& character : chars2) {
+        character->Move();
     }
     
 }
@@ -566,7 +572,6 @@ void ShowSprites()
         auto enemy = loc[player.current_location].enemies[i].en_sprite;
         ShowBitmap(window.context, enemy.x, enemy.y, enemy.width, enemy.height, enemy.hBitmap);
     }
-    //ShowBitmap(window.context, enemy.enemy_sprite.x, enemy.enemy_sprite.y, enemy.enemy_sprite.width, enemy.enemy_sprite.height, enemy.enemy_sprite.hBitmap);
 }
 
 void LimitHero()
@@ -596,37 +601,6 @@ void InitWindow()
     GetClientRect(window.hWnd, &r);
 
 }
-
-//void CleanupResources() {
-//    // Очистка битмапов игрока
-//    if (player.hBitmapRight) DeleteObject(player.hBitmapRight);
-//    if (player.hBitmapLeft) DeleteObject(player.hBitmapLeft);
-//
-//    // Очистка битмапов локаций
-//    for (int i = 0; i < 5; i++) {
-//        if (loc[i].hBitmap) DeleteObject(loc[i].hBitmap);
-//    }
-//
-//    // Очистка битмапов предметов
-//    for (auto& item : itemLib) {
-//        if (item.Sprite.hBitmap) DeleteObject(item.Sprite.hBitmap);
-//    }
-//
-//    // Очистка битмапов платформ
-//    for (int i = 0; i < 5; i++) {
-//        for (auto& plat : loc[i].plats) {
-//            if (plat.pl_sprite.hBitmap) DeleteObject(plat.pl_sprite.hBitmap);
-//        }
-//    }
-//
-//    //// Очистка контекстов устройства
-//    //if (window.context) {
-//    //    DeleteDC(window.context);
-//    //}
-//    //if (window.device_context) {
-//    //    ReleaseDC(window.hWnd, window.device_context);
-//    //}
-//}
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,
@@ -660,7 +634,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
         }
         LimitHero();//проверяем, чтобы ракетка не убежала за экран
-        //CleanupResources(); //ОЧИЩАЕМ БИТМАПКИ
     }
 
 }
