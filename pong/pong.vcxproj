@@ -153,6 +153,8 @@
     <Media Include="..\Debug\music.mp3" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Bitmaps.h" />
+    <ClInclude Include="functions.h" />
     <ClInclude Include="PornHub.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

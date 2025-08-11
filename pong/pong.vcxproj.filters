@@ -70,5 +70,11 @@
     <ClInclude Include="PornHub.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Bitmaps.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="functions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
