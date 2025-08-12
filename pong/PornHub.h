@@ -34,6 +34,12 @@ struct player_ {
 
 player_ player;
 
+struct ball_ {
+    sprite Sprite;
+};
+
+ball_ ball;
+
 auto Load(LPCSTR name) {
     return (HBITMAP)LoadImageA(NULL, name, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 }

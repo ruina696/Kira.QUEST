@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include "PornHub.h" 
 
 
@@ -6,6 +6,7 @@
 int gravity = 15;
 int jump = 0;
 bool isJumping = false;
+bool OnScreen = false;
 
 void ProcessInput()
 {
@@ -32,9 +33,31 @@ void ProcessInput()
     player.hero_sprite.y += gravity - jump;
     player.hero_sprite.y = min(window.height - player.hero_sprite.height, player.hero_sprite.y);
     jump *= 0.8;
+    
+
+    if (GetAsyncKeyState('E') && (player.hBitmapRight)) {
+        OnScreen = true;
+        //ball.Sprite.x = player.hero_sprite.x;
+        ShowBitmap(window.context, ball.Sprite.x, ball.Sprite.y, ball.Sprite.width, ball.Sprite.height, ball.Sprite.hBitmap);
+        
+        ball.Sprite.x += ball.Sprite.speed;
+
+        
+        OnScreen = false;
+    }
+    //if (GetAsyncKeyState('E') && (player.hBitmapLeft)) {
+    //    OnScreen = true;
+    //    ShowBitmap(window.context, ball.Sprite.x, ball.Sprite.y, ball.Sprite.width, ball.Sprite.height, ball.Sprite.hBitmap);
+    //    ball.Sprite.x = player.hero_sprite.x;
+    //    while ((ball.Sprite.x >= 0) && (ball.Sprite.x <= window.width)) {
+    //    
+    //    ball.Sprite.x -= ball.Sprite.speed;
+    //    }
+    //    OnScreen = false;
+    //}
 }
 
-void ClearVectors() //ñíà÷àëà î÷èùàåì áèòìàïêè, ïîòîì ñàìè âåêòîðû
+void ClearVectors() //ÑÐ½Ð°Ñ‡Ð°Ð»Ð° Ð¾Ñ‡Ð¸Ñ‰Ð°ÐµÐ¼ Ð±Ð¸Ñ‚Ð¼Ð°Ð¿ÐºÐ¸, Ð¿Ð¾Ñ‚Ð¾Ð¼ ÑÐ°Ð¼Ð¸ Ð²ÐµÐºÑ‚Ð¾Ñ€Ñ‹
 {
     for (int i = 0; i <= 2; i++) {
         for (auto& enemy : loc[i].enemies) {

@@ -1,4 +1,4 @@
-#pragma once
+п»ї#pragma once
 #include "PornHub.h"
 
 
@@ -8,26 +8,26 @@ void ShowBitmap(HDC hDC, int x, int y, int x1, int y1, HBITMAP hBitmapBall, bool
     HDC hMemDC;
     BITMAP bm;
 
-    hMemDC = CreateCompatibleDC(hDC); // Создаем контекст памяти, совместимый с контекстом отображения
-    hOldbm = (HBITMAP)SelectObject(hMemDC, hBitmapBall);// Выбираем изображение bitmap в контекст памяти
+    hMemDC = CreateCompatibleDC(hDC); // РЎРѕР·РґР°РµРј РєРѕРЅС‚РµРєСЃС‚ РїР°РјСЏС‚Рё, СЃРѕРІРјРµСЃС‚РёРјС‹Р№ СЃ РєРѕРЅС‚РµРєСЃС‚РѕРј РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ
+    hOldbm = (HBITMAP)SelectObject(hMemDC, hBitmapBall);// Р’С‹Р±РёСЂР°РµРј РёР·РѕР±СЂР°Р¶РµРЅРёРµ bitmap РІ РєРѕРЅС‚РµРєСЃС‚ РїР°РјСЏС‚Рё
 
-    if (hOldbm) // Если не было ошибок, продолжаем работу
+    if (hOldbm) // Р•СЃР»Рё РЅРµ Р±С‹Р»Рѕ РѕС€РёР±РѕРє, РїСЂРѕРґРѕР»Р¶Р°РµРј СЂР°Р±РѕС‚Сѓ
     {
-        GetObject(hBitmapBall, sizeof(BITMAP), (LPSTR)&bm); // Определяем размеры изображения
+        GetObject(hBitmapBall, sizeof(BITMAP), (LPSTR)&bm); // РћРїСЂРµРґРµР»СЏРµРј СЂР°Р·РјРµСЂС‹ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ
 
         if (alpha)
         {
-            TransparentBlt(window.context, x, y, x1, y1, hMemDC, 0, 0, x1, y1, RGB(0, 0, 0));//все пиксели черного цвета будут интепретированы как прозрачные
+            TransparentBlt(window.context, x, y, x1, y1, hMemDC, 0, 0, x1, y1, RGB(0, 0, 0));//РІСЃРµ РїРёРєСЃРµР»Рё С‡РµСЂРЅРѕРіРѕ С†РІРµС‚Р° Р±СѓРґСѓС‚ РёРЅС‚РµРїСЂРµС‚РёСЂРѕРІР°РЅС‹ РєР°Рє РїСЂРѕР·СЂР°С‡РЅС‹Рµ
         }
         else
         {
-            StretchBlt(hDC, x, y, x1, y1, hMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY); // Рисуем изображение bitmap
+            StretchBlt(hDC, x, y, x1, y1, hMemDC, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY); // Р РёСЃСѓРµРј РёР·РѕР±СЂР°Р¶РµРЅРёРµ bitmap
         }
 
-        SelectObject(hMemDC, hOldbm);// Восстанавливаем контекст памяти
+        SelectObject(hMemDC, hOldbm);// Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµРј РєРѕРЅС‚РµРєСЃС‚ РїР°РјСЏС‚Рё
     }
 
-    DeleteDC(hMemDC); // Удаляем контекст памяти
+    DeleteDC(hMemDC); // РЈРґР°Р»СЏРµРј РєРѕРЅС‚РµРєСЃС‚ РїР°РјСЏС‚Рё
 }
 
 
@@ -35,11 +35,11 @@ void ShowBitmap(HDC hDC, int x, int y, int x1, int y1, HBITMAP hBitmapBall, bool
 
 void ShowSprites()
 {
-    ShowBitmap(window.context, 0, 0, window.width, window.height, loc[player.current_location].hBitmap);//задний фон
+    ShowBitmap(window.context, 0, 0, window.width, window.height, loc[player.current_location].hBitmap);//Р·Р°РґРЅРёР№ С„РѕРЅ
 
     for (int i = 0; i < loc[player.current_location].items.size(); i++) {
         auto item = loc[player.current_location].items[i].Sprite;
-        ShowBitmap(window.context, item.x, item.y, item.width, item.height, item.hBitmap);//предметы на карте
+        ShowBitmap(window.context, item.x, item.y, item.width, item.height, item.hBitmap);//РїСЂРµРґРјРµС‚С‹ РЅР° РєР°СЂС‚Рµ
 
         if (player.hero_sprite.x + player.hero_sprite.width >= item.x && player.hero_sprite.x <= item.x + item.width &&
             player.hero_sprite.y + player.hero_sprite.height >= item.y) {
@@ -51,16 +51,16 @@ void ShowSprites()
 
     if (!player.player_items.empty()) {
         for (int i = 0; i < player.player_items.size(); i++) {
-            ShowBitmap(window.context, 200 + i * 120, 100, player.player_items[i].Sprite.width, player.player_items[i].Sprite.height, player.player_items[i].Sprite.hBitmap);//предметы в инвентаре
+            ShowBitmap(window.context, 200 + i * 120, 100, player.player_items[i].Sprite.width, player.player_items[i].Sprite.height, player.player_items[i].Sprite.hBitmap);//РїСЂРµРґРјРµС‚С‹ РІ РёРЅРІРµРЅС‚Р°СЂРµ
         }
     }
 
-    ShowBitmap(window.context, player.hero_sprite.x, player.hero_sprite.y, player.hero_sprite.width, player.hero_sprite.height, player.hero_sprite.hBitmap);// ракетка игрока
+    ShowBitmap(window.context, player.hero_sprite.x, player.hero_sprite.y, player.hero_sprite.width, player.hero_sprite.height, player.hero_sprite.hBitmap);// СЂР°РєРµС‚РєР° РёРіСЂРѕРєР°
 
     for (int i = 0; i < loc[player.current_location].plats.size(); i++)
     {
         auto platform = loc[player.current_location].plats[i].pl_sprite;
-        ShowBitmap(window.context, platform.x, platform.y, platform.width, platform.height, platform.hBitmap);//платформы
+        ShowBitmap(window.context, platform.x, platform.y, platform.width, platform.height, platform.hBitmap);//РїР»Р°С‚С„РѕСЂРјС‹
     }
     /*  for (int i = 0; i < loc[player.current_location].enemies.size(); i++) {
           auto enemy = loc[player.current_location].enemies[i].en_sprite;
@@ -70,7 +70,7 @@ void ShowSprites()
     for (int i = 0; i < loc[player.current_location].chars.size(); i++) {
         auto charact = loc[player.current_location].chars[i]->Sprite;
         if (!charact.hBitmap) {
-            MessageBox(window.hWnd, "ПУСТО", "PORNO", MB_OK);
+            MessageBox(window.hWnd, "РџРЈРЎРўРћ", "PORNO", MB_OK);
         }
         else {
             ShowBitmap(window.context, charact.x, charact.y,
@@ -79,4 +79,6 @@ void ShowSprites()
         }
     }
     //ShowBitmap(window.context, sam.Sprite.x, sam.Sprite.y, sam.Sprite.width, sam.Sprite.height, sam.Sprite.hBitmap);
+
 }
+

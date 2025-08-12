@@ -73,6 +73,12 @@ void InitGame()
     player.hBitmapLeft = Load("hero_left.bmp");
     player.hero_sprite.hBitmap = player.hBitmapRight;
 
+    ball.Sprite.speed = 30;
+    ball.Sprite.y = player.hero_sprite.y;
+    ball.Sprite.width = 20;
+    ball.Sprite.height = 20;
+    ball.Sprite.hBitmap = Load("ball.bmp");
+
     //Character character(100, window.height,300, 15);
     Character* a1 = new Character(1000, 1100, 1500, 15);
     Wolf* a2 = new Wolf(500, window.height - 300, 1000, 25, 150, 150);
@@ -148,7 +154,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
         GameOver();
         
         ShowSprites();//рисуем фон, героя, предметы и платформы
-        
+        //if (OnScreen == true) {
+           
+        //}
+
         ProcessInput();//опрос клавиатуры
 
         Trace();
