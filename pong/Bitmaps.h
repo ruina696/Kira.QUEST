@@ -62,10 +62,10 @@ void ShowSprites()
         auto platform = loc[player.current_location].plats[i].pl_sprite;
         ShowBitmap(window.context, platform.x, platform.y, platform.width, platform.height, platform.hBitmap);//платформы
     }
-    /*  for (int i = 0; i < loc[player.current_location].enemies.size(); i++) {
+      for (int i = 0; i < loc[player.current_location].enemies.size(); i++) {
           auto enemy = loc[player.current_location].enemies[i].en_sprite;
           ShowBitmap(window.context, enemy.x, enemy.y, enemy.width, enemy.height, enemy.hBitmap);
-      }*/
+      }
 
     for (int i = 0; i < loc[player.current_location].chars.size(); i++) {
         auto charact = loc[player.current_location].chars[i]->Sprite;

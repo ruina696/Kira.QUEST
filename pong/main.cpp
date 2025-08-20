@@ -52,9 +52,9 @@ void InitGame()
     loc[2].plats.emplace_back(window.width / 6, window.height - 200, 60, 1000);
     loc[2].plats.emplace_back(window.width / 1.4, window.height - 500, 60, 600);
 
-    //loc[0].enemies.emplace_back(window.width / 1.9, window.height - 300, window.width / 1.9 + 500, 3);
-    //loc[0].enemies.emplace_back(window.width / 6, window.height - 450, window.width / 6 + 500, 3);
-    //loc[0].enemies.emplace_back(window.width / 4, window.height - 100, window.width / 4 + 500, 3);
+    loc[0].enemies.emplace_back(window.width / 1.9, window.height - 300, window.width / 1.9 + 500, 3);
+    loc[0].enemies.emplace_back(window.width / 6, window.height - 450, window.width / 6 + 500, 3);
+    loc[0].enemies.emplace_back(window.width / 4, window.height - 100, window.width / 4 + 500, 3);
     loc[1].enemies.emplace_back(window.width / 4, window.height - 100, window.width / 4 + 500, 3);
     loc[1].enemies.emplace_back(window.width / 1.4, window.height - 300, window.width / 1.1, 3);
 

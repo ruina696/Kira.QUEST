@@ -80,6 +80,14 @@ void ClearVectors() //сначала очищаем битмапки, потом
             }
         }
         loc[i].items.clear();
+
+        for (auto& ch : loc[i].chars) {
+            if (ch->Sprite.hBitmap) {
+                DeleteObject(ch->Sprite.hBitmap);
+            }
+        }
+        loc[i].chars.clear();
+
     }
 
     for (auto& item : player.player_items)
@@ -98,6 +106,7 @@ void ClearVectors() //сначала очищаем битмапки, потом
     }
     itemLib.clear();
 
+    
 }
 
 
